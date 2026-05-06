@@ -64,14 +64,31 @@ def upload():
         flash("No File Part")
         return redirect(request.referrer)
     
-    f = request.files["file"]
-    if f.filename == '':
+    file = request.files["file"]
+    if file.filename == '':
         flash("No File Selected")
         return redirect(request.referrer)
     
-    filename = Path(f.filename).name
-    f.save(full_Path / filename)
-    flash(f"Uploaded: {filename}")
+    filename = Path(file.filename).name
+    destination = full_Path / filename
+
+    if destination.exists():
+        flash("File Already Exists")
+        return redirect(request.referrer)
+    
+    try:
+        with open(destination, "wb") as f:
+            while True:
+                chunk = file.stream.read(1024 * 1024) 
+                if not chunk:
+                    break
+                f.write(chunk)
+
+        flash(f"Uploaded: {filename}")
+
+    except Exception as e:
+        flash(f"Error: {e}")
+        return redirect(request.referrer)
 
     target_url = f"/{subpath}" if subpath else "/"
     return redirect(f"{target_url}?hidden={show_Hidden_State}")
