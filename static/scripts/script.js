@@ -66,3 +66,60 @@ document.addEventListener("click", function (e) {
         }
     }
 });
+
+document.getElementById('upload-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    uploadFile();
+});
+
+function uploadFile() {
+    const fileInput = document.getElementById('file-input');
+    const path = document.getElementById('upload-path').value;
+    const showHidden = document.getElementById('show-hidden-state').value;
+    
+    if (fileInput.files.length === 0) {
+        alert("Please select a file first.");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("path", path);
+    formData.append("show_hidden", showHidden);
+
+    const xhr = new XMLHttpRequest();
+    const container = document.getElementById('progress-container');
+    const progressText = document.getElementById('progress-text');
+
+    // Show progress bar
+    container.style.display = 'block';
+
+    // Track Progress
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            progressText.innerHTML = percentComplete + '%';
+        }
+    };
+
+    // Handle Completion
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            // Redirect to the target URL to show the flash message and new file
+            const targetUrl = path ? `/${path}?hidden=${showHidden}` : `/?hidden=${showHidden}`;
+            window.location.href = targetUrl;
+        } else {
+            alert("Upload Failed. Error Code: " + xhr.status);
+            container.style.display = 'none';
+        }
+    };
+
+    xhr.onerror = function() {
+        alert("An Error Occurred during the Upload.");
+        container.style.display = 'none';
+    };
+
+    xhr.open("POST", "/upload", true);
+    xhr.send(formData);
+}
