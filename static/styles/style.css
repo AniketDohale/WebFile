@@ -80,18 +80,17 @@ h2 {
     gap: 8px;
     min-width: 0;
     flex: 1;
+    overflow: hidden;
 }
 
-.file-name a {
+.file-name a,
+.file-name span {
     text-decoration: none;
     color: #1a73e8;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.file-name a:hover {
-    text-decoration: underline;
+    display: block;
 }
 
 /* Actions */
