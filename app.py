@@ -4,6 +4,7 @@ from pathlib import Path
 
 app = Flask(__name__)
 BASE_DIR = Path(r"D:\Media").resolve()
+# BASE_DIR = Path("/home/raspberry_cli").resolve()
 
 def safe_Path(subpath):
     full_Path = (BASE_DIR / subpath).resolve()
@@ -100,4 +101,4 @@ def delete():
     return redirect(f"/{parent}" if str(parent) != "." else "/")
 
 if __name__=="__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
