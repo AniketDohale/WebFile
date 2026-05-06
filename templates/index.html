@@ -25,8 +25,25 @@
         <div class="panel">
             <form action="/upload" method="post" enctype="multipart/form-data" class="upload">
                 <input type="hidden" name="path" value="{{ current_path }}">
+                <input type="hidden" name="show_hidden" value="{{ 'true' if show_Hidden else 'false' }}">
                 <input type="file" name="file" required>
-                <button style="background:#1a73e8;color:white;">Upload</button>
+
+                <div class="action-group">
+                    <button type="submit" class="icon-action-btn btn-upload" title="Upload">
+                        <img src="/static/icons/upload.png" alt="Upload">
+                    </button>
+
+                    {% set toggle_path = current_path.strip('/') %}
+                    {% if show_Hidden %}
+                        <a href="/{{ current_path.strip('/') }}?hidden=false" class="icon-action-btn" title="Hide Hidden Files">
+                            <img src="/static/icons/show.png" alt="Show">
+                        </a>
+                    {% else %}
+                        <a href="/{{ current_path.strip('/') }}?hidden=true" class="icon-action-btn" title="Show Hidden Files">
+                            <img src="/static/icons/hide.png" alt="Hide">
+                        </a>
+                    {% endif %}
+                </div>
             </form>
         </div>
 
@@ -86,6 +103,7 @@
                         <form action="/rename" class="icon-form" method="post" id="rename-form-{{ loop.index }}">
                             <input type="hidden" name="old_path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
                             <input type="hidden" name="new_name" placeholder="Rename" id="new-name-{{ loop.index }}" required>
+                            <input type="hidden" name="show_hidden" value="{{ 'true' if show_Hidden else 'false' }}">
                             <button class="icon-btn btn-rename" onclick="triggerRename('{{ item.name }}', '{{ loop.index }}')">
                                 Rename
                             </button>
@@ -93,6 +111,7 @@
 
                         <form action="/delete" class="icon-form" method="post" onsubmit="return confirm('Delete {{ item.name }} ?');">
                             <input type="hidden" name="path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
+                            <input type="hidden" name="show_hidden" value="{{ 'true' if show_Hidden else 'false' }}">
                             <button class="icon-btn btn-delete">
                                 Delete
                             </button>
