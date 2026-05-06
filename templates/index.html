@@ -1,39 +1,82 @@
-<h2>File Manager</h2>
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilePi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+</head>
 
-<form action="/upload" method="post" enctype="multipart/form-data">
-  <input type="hidden" name="path" value="{{ current_path }}">
-  <input type="file" name="file">
-  <button type="submit">Upload</button>
-</form>
+<body>
+    <div class="container">
+        <h2>File Manager</h2>
 
-<ul>
-  {% for item in items %}
-    <li>
-      {% if item.is_dir %}
-        📁 
-        <a href="/{{ (current_path ~ '/' ~ item.name).strip('/') }}">
-          {{ item.name }}
-        </a>
-      {% else %}
-        📄 {{ item.name }}
-        <a href="/download/{{ (current_path ~ '/' ~ item.name).strip('/') }}">
-          Download
-        </a>
-      {% endif %}
-    
-    <form action="/rename" method="post" style="display:inline;">
-        <input type="hidden" name="old_path"
-                value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
-        <input type="text" name="new_name" placeholder="New name" required>
-        <button type="submit">Rename</button>
-    </form>
+        <!-- Upload -->
+        <div class="panel">
+            <form action="/upload" method="post" enctype="multipart/form-data" class="upload">
+                <input type="hidden" name="path" value="{{ current_path }}">
+                <input type="file" name="file" required>
+                <button style="background:#1a73e8;color:white;">Upload</button>
+            </form>
+        </div>
 
-    <form action="/delete" method="post" style="display:inline;"
-      onsubmit="return confirm('Are you sure?');">
-        <input type="hidden" name="path"
-                value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
-        <button type="submit">Delete</button>
-    </form>
-    </li>
-  {% endfor %}  
-</ul>
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/">Home</a>
+            {% set parts = current_path.split('/') if current_path else [] %}
+            {% set path_acc = '' %}
+
+            {% for part in parts %}
+            {% set path_acc = path_acc + '/' + part %}
+            / <a href="{{ path_acc }}">{{ part }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- Files -->
+        <div class="file-list">
+
+            {% for item in items %}
+            <div class="file-row">
+
+                <div class="file-name">
+                    {% if item.is_dir %}
+                    📁
+                    <a href="/{{ (current_path ~ '/' ~ item.name).strip('/') }}">
+                        {{ item.name }}
+                    </a>
+                    {% else %}
+                    📄 {{ item.name }}
+                    {% endif %}
+                </div>
+
+                <div class="actions">
+
+                    <form action="/rename" class="icon-form" method="post" id="rename-form-{{ loop.index }}">
+                        <input type="hidden" name="old_path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
+                        <input type="hidden" name="new_name" placeholder="Rename" id="new-name-{{ loop.index }}" required>
+                        <button class="icon-btn btn-rename" onclick="triggerRename('{{ item.name }}', '{{ loop.index }}')">
+                            <img src="/static/icons/edit.png" alt="Rename">
+                        </button>
+                    </form>
+
+                    <form action="/delete" class="icon-form" method="post" onsubmit="return confirm('Delete this item?');">
+                        <input type="hidden" name="path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
+                        <button class="icon-btn btn-delete">
+                            <img src="/static/icons/delete.png" alt="Delete">
+                        </button>
+                    </form>
+
+                    {% if not item.is_dir %}
+                    <a class="icon-btn btn-download" href="/download/{{ (current_path ~ '/' ~ item.name).strip('/') }}"
+                        title="Download">
+                        <img src="/static/icons/download.png" alt="Download">
+                    </a>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
+</body>
+</html>
