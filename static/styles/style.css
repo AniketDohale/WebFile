@@ -86,7 +86,7 @@ h2 {
 .file-name {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
     min-width: 0;
     flex: 1;
     overflow: hidden;
