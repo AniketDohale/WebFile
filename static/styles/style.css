@@ -135,8 +135,7 @@ h2 {
     overflow: hidden;
 }
 
-.file-name a,
-.file-name span {
+.file-name a {
     text-decoration: none;
     color: #1a73e8;
     white-space: nowrap;

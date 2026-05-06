@@ -90,7 +90,9 @@
                             📄
                         {% endif %}
                         
-                        <span title="{{ item.name }}">{{ item.name }}</span>
+                        <a href="/view/{{ (current_path ~ '/' ~ item.name).strip('/') }}" target="_blank" class="view-link">
+                            {{ item.name }}
+                        </a>
                     {% endif %}
                 </div>
 

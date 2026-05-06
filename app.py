@@ -146,5 +146,19 @@ def delete():
     target_path = f"/{parent}" if str(parent) != "." else "/"
     return redirect(f"{target_path}?hidden={show_Hidden_State}")
 
+
+@app.route("/view/<path:filepath>")
+def view(filepath):
+    full_Path = safe_Path(filepath)
+
+    if not full_Path.exists() or not full_Path.is_file():
+        abort(404)
+
+    return send_from_directory(
+        directory=full_Path.parent, 
+        path=full_Path.name, 
+        as_attachment=False
+    )
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3001, debug=True)
