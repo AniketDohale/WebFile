@@ -39,12 +39,30 @@
 
                 <div class="file-name">
                     {% if item.is_dir %}
-                    📁
-                    <a href="/{{ (current_path ~ '/' ~ item.name).strip('/') }}">
-                        {{ item.name }}
-                    </a>
+                        📁 <a href="/{{ (current_path ~ '/' ~ item.name).strip('/') }}">{{ item.name }}</a>
                     {% else %}
-                    📄 {{ item.name }}
+                        {# Extract extension and check types #}
+                        {% set ext = item.name.split('.')[-1].lower() %}
+                        
+                        {% if ext in ['jpg', 'jpeg', 'png', 'gif', 'svg'] %}
+                            🖼️
+                        {% elif ext in ['mp4', 'mkv', 'mov', 'avi'] %}
+                            🎬
+                        {% elif ext in ['mp3', 'wav', 'ogg', 'flac'] %}
+                            🎵
+                        {% elif ext in ['pdf'] %}
+                            📕
+                        {% elif ext in ['zip', 'rar', '7z', 'tar', 'gz'] %}
+                            📦
+                        {% elif ext in ['txt', 'md'] %}
+                            📝
+                        {% elif ext in ['py', 'js', 'html', 'css', 'json'] %}
+                            💻
+                        {% else %}
+                            📄
+                        {% endif %}
+                        
+                        {{ item.name }}
                     {% endif %}
                 </div>
 
