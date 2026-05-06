@@ -10,6 +10,19 @@ function triggerRename(oldName, index) {
         form.submit();
 }
 
+function triggerCreate(type) {
+    let name = prompt(`Enter ${type} Name:`);
+    if (name && name.trim() !== "") {
+        if (type === 'folder') {
+            document.getElementById('folder-name-input').value = name;
+            document.getElementById('folder-form').submit();
+        } else {
+            document.getElementById('file-name-input').value = name;
+            document.getElementById('file-form').submit();
+        }
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const messages = document.querySelectorAll(".flash-msg-item");
 

@@ -160,5 +160,53 @@ def view(filepath):
         as_attachment=False
     )
 
+
+@app.route("/create-file", methods=["POST"])
+def create_File():
+    subpath = request.form.get("path", "")
+    file_Name = request.form.get("file_name")
+    show_Hidden = request.form.get("show_hidden", "false")
+    
+    if not file_Name:
+        flash("File Name is Required")
+        return redirect(request.referrer)
+
+    full_path = safe_Path(subpath) / file_Name
+    
+    try:
+        full_path.touch(exist_ok=False)
+        flash(f"File '{file_Name}' Created.")
+    except FileExistsError:
+        flash("File Already Exists.")
+    except Exception as e:
+        flash(f"Error: {e}")
+
+    target_url = f"/{subpath}" if subpath else "/"
+    return redirect(f"{target_url}?hidden={show_Hidden}")
+
+
+@app.route("/create-folder", methods=["POST"])
+def create_Folder():
+    subpath = request.form.get("path", "")
+    folder_Name = request.form.get("folder_name")
+    show_Hidden = request.form.get("show_hidden", "false")
+    
+    if not folder_Name:
+        flash("Folder Name is Required")
+        return redirect(request.referrer)
+
+    full_path = safe_Path(subpath) / folder_Name
+    
+    try:
+        full_path.mkdir(exist_ok=False)
+        flash(f"Folder '{folder_Name}' Created.")
+    except FileExistsError:
+        flash("Folder Already Exists.")
+    except Exception as e:
+        flash(f"Error: {e}")
+
+    target_url = f"/{subpath}" if subpath else "/"
+    return redirect(f"{target_url}?hidden={show_Hidden}")
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3001, debug=True)
