@@ -25,7 +25,6 @@
         <div class="panel">
             <form action="/upload" method="post" enctype="multipart/form-data" class="upload" id="upload-form">
                 <input type="hidden" name="path" value="{{ current_path }}" id="upload-path">
-                <input type="hidden" name="show_hidden" value="{{ 'true' if show_Hidden else 'false' }}" id="show-hidden-state">
                 <input type="file" name="file" id="file-input" required>
 
                 <button type="submit" class="btn-upload" title="Upload">
@@ -47,7 +46,6 @@
             <!-- Create Folder Form -->
             <form action="/create-folder" method="post" id="folder-form">
                 <input type="hidden" name="path" value="{{ current_path }}">
-                <input type="hidden" name="show_hidden" value="{{ 'true' if show_Hidden else 'false' }}">
                 <input type="hidden" name="folder_name" id="folder-name-input">
                 <button type="button" class="icon-creation-btn" onclick="triggerCreate('folder')" title="New Folder">
                     <img src="/static/icons/create-folder.png" alt="Create Folder">
@@ -57,7 +55,6 @@
             <!-- Create File Form -->
             <form action="/create-file" method="post" id="file-form">
                 <input type="hidden" name="path" value="{{ current_path }}">
-                <input type="hidden" name="show_hidden" value="{{ 'true' if show_Hidden else 'false' }}">
                 <input type="hidden" name="file_name" id="file-name-input">
                 <button type="button" class="icon-creation-btn" onclick="triggerCreate('file')" title="New File">
                     <img src="/static/icons/create-file.png" alt="Create File">
@@ -134,7 +131,6 @@
                         <form action="/rename" class="icon-form" method="post" id="rename-form-{{ loop.index }}">
                             <input type="hidden" name="old_path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
                             <input type="hidden" name="new_name" placeholder="Rename" id="new-name-{{ loop.index }}" required>
-                            <input type="hidden" name="show_hidden" value="{{ 'true' if show_Hidden else 'false' }}">
                             <button class="icon-btn btn-rename" onclick="triggerRename('{{ item.name }}', '{{ loop.index }}')">
                                 Rename
                             </button>
@@ -142,7 +138,6 @@
 
                         <form action="/delete" class="icon-form" method="post" onsubmit="return confirm('Delete {{ item.name }} ?');">
                             <input type="hidden" name="path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
-                            <input type="hidden" name="show_hidden" value="{{ 'true' if show_Hidden else 'false' }}">
                             <button class="icon-btn btn-delete">
                                 Delete
                             </button>

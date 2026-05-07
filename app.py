@@ -1,5 +1,5 @@
 import shutil
-from flask import Flask, render_template, request, redirect, send_from_directory, abort, flash
+from flask import Flask, render_template, request, redirect, send_from_directory, abort, flash, session
 from pathlib import Path
 from paths import BASE_DIR
 
@@ -30,10 +30,13 @@ def browse(subpath=""):
     if not full_Path.exists():
         flash("Folder Not Found")
         return redirect("/")
+    
+    url_hidden_param = request.args.get('hidden')
+    if url_hidden_param is not None:
+        session['show_hidden'] = (url_hidden_param == 'true')
+    show_Hidden = session.get('show_hidden', False)
 
     items = []
-
-    show_Hidden = request.args.get('hidden', 'false') == 'true'
 
     for item in full_Path.iterdir():
         if not show_Hidden and item.name.startswith('.'):
@@ -55,27 +58,24 @@ def browse(subpath=""):
 @app.route("/upload", methods=["POST"])
 def upload():
     subpath = request.form.get("path", "")
-    show_Hidden_State = request.form.get("show_hidden", "false")
     full_Path = safe_Path(subpath)
 
     if 'file' not in request.files:
-        flash("No File Part")
-        return redirect(request.referrer)
+        return "No File Part", 400
     
     file = request.files["file"]
     if file.filename == '':
-        flash("No File Selected")
-        return redirect(request.referrer)
+        return "No File Selected", 400
     
     filename = Path(file.filename).name
     destination = full_Path / filename
 
     if destination.exists():
-        flash("File Already Exists")
-        return redirect(request.referrer)
+        return "File Already Exists", 400
     
     try:
         with open(destination, "wb") as f:
+            file.stream.seek(0)
             while True:
                 chunk = file.stream.read(1024 * 1024) 
                 if not chunk:
@@ -83,13 +83,10 @@ def upload():
                 f.write(chunk)
 
         flash(f"Uploaded: {filename}")
+        return "OK", 200
 
     except Exception as e:
-        flash(f"Error: {e}")
-        return redirect(request.referrer)
-
-    target_url = f"/{subpath}" if subpath else "/"
-    return redirect(f"{target_url}?hidden={show_Hidden_State}")
+        return str(e), 500
 
 
 @app.route("/download/<path:filepath>")
@@ -106,8 +103,6 @@ def download(filepath):
 def rename():
     old_Path = request.form.get("old_path")
     new_Name = request.form.get("new_name")
-
-    show_Hidden_State = request.form.get("show_hidden", "false")
 
     full_old_Path = safe_Path(old_Path)
 
@@ -133,14 +128,12 @@ def rename():
 
     parent = full_old_Path.parent.relative_to(BASE_DIR)
     target_path = f"/{parent}" if str(parent) != "." else "/"
-    return redirect(f"{target_path}?hidden={show_Hidden_State}")
+    return redirect(target_path)
 
 
 @app.route("/delete", methods=["POST"])
 def delete():
     target_path = request.form.get("path")
-
-    show_Hidden_State = request.form.get("show_hidden", "false")
 
     full_Path = safe_Path(target_path)
     
@@ -159,7 +152,7 @@ def delete():
 
     parent = full_Path.parent.relative_to(BASE_DIR)
     target_path = f"/{parent}" if str(parent) != "." else "/"
-    return redirect(f"{target_path}?hidden={show_Hidden_State}")
+    return redirect(target_path)
 
 
 @app.route("/view/<path:filepath>")
@@ -180,7 +173,6 @@ def view(filepath):
 def create_File():
     subpath = request.form.get("path", "")
     file_Name = request.form.get("file_name")
-    show_Hidden = request.form.get("show_hidden", "false")
     
     if not file_Name:
         flash("File Name is Required")
@@ -197,14 +189,13 @@ def create_File():
         flash(f"Error: {e}")
 
     target_url = f"/{subpath}" if subpath else "/"
-    return redirect(f"{target_url}?hidden={show_Hidden}")
+    return redirect(target_url)
 
 
 @app.route("/create-folder", methods=["POST"])
 def create_Folder():
     subpath = request.form.get("path", "")
     folder_Name = request.form.get("folder_name")
-    show_Hidden = request.form.get("show_hidden", "false")
     
     if not folder_Name:
         flash("Folder Name is Required")
@@ -221,7 +212,7 @@ def create_Folder():
         flash(f"Error: {e}")
 
     target_url = f"/{subpath}" if subpath else "/"
-    return redirect(f"{target_url}?hidden={show_Hidden}")
+    return redirect(target_url)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3001, debug=True)

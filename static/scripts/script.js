@@ -73,7 +73,6 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
 function uploadFile() {
     const fileInput = document.getElementById('file-input');
     const path = document.getElementById('upload-path').value;
-    const showHidden = document.getElementById('show-hidden-state').value;
 
     if (fileInput.files.length === 0) {
         alert("Please select a file first.");
@@ -84,12 +83,11 @@ function uploadFile() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("path", path);
-    formData.append("show_hidden", showHidden);
 
     const xhr = new XMLHttpRequest();
     const container = document.getElementById('progress-container');
     const progressText = document.getElementById('progress-text');
-    
+
     // New Elements
     const uploadedSizeText = document.getElementById('uploaded-size');
     const totalSizeText = document.getElementById('total-size');
@@ -103,7 +101,7 @@ function uploadFile() {
     xhr.upload.onprogress = function (e) {
         if (e.lengthComputable) {
             const percentComplete = Math.round((e.loaded / e.total) * 100);
-            
+
             // 1. Calculate Sizes (convert bytes to MB)
             const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
             const totalMB = (e.total / (1024 * 1024)).toFixed(2);
@@ -140,8 +138,14 @@ function uploadFile() {
     // Handle Completion
     xhr.onload = function () {
         if (xhr.status === 200) {
-            const targetUrl = path ? `/${path}?hidden=${showHidden}` : `/?hidden=${showHidden}`;
-            window.location.href = targetUrl;
+            progressText.innerHTML = '100%';
+            timeRemainingText.innerHTML = "Upload Successful! Finalizing...";
+
+            const targetUrl = path ? `/${path}` : `/`;
+
+            setTimeout(function () {
+                window.location.href = targetUrl;
+            }, 500);
         } else {
             alert("Upload Failed. Error Code: " + xhr.status);
             container.style.display = 'none';
