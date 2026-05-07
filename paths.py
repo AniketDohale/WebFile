@@ -20,4 +20,8 @@ os.environ["TMPDIR"] = str(TEMP_DIR)
 os.environ["TEMP"] = str(TEMP_DIR)
 os.environ["TMP"] = str(TEMP_DIR)
 
+print("SYSTEM:", SYSTEM)
+print("BASE_DIR:", BASE_DIR)
+print("TEMP_DIR:", TEMP_DIR)
+
 tempfile.tempdir = str(TEMP_DIR)

@@ -89,27 +89,57 @@ function uploadFile() {
     const xhr = new XMLHttpRequest();
     const container = document.getElementById('progress-container');
     const progressText = document.getElementById('progress-text');
+    
+    // New Elements
+    const uploadedSizeText = document.getElementById('uploaded-size');
+    const totalSizeText = document.getElementById('total-size');
+    const timeRemainingText = document.getElementById('time-remaining');
 
-    // Show progress bar
     container.style.display = 'block';
 
-    // Track Progress
+    // Track start time
+    const startTime = new Date().getTime();
+
     xhr.upload.onprogress = function (e) {
         if (e.lengthComputable) {
             const percentComplete = Math.round((e.loaded / e.total) * 100);
+            
+            // 1. Calculate Sizes (convert bytes to MB)
+            const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
+            const totalMB = (e.total / (1024 * 1024)).toFixed(2);
+
+            // 2. Calculate Estimated Time
+            const currentTime = new Date().getTime();
+            const durationInSeconds = (currentTime - startTime) / 1000;
+            const bitsPerSecond = e.loaded / durationInSeconds;
+            const remainingBytes = e.total - e.loaded;
+            const secondsRemaining = remainingBytes / bitsPerSecond;
+
+            // Update UI
+            progressText.innerHTML = percentComplete + '%';
+            uploadedSizeText.innerHTML = loadedMB + ' MB';
+            totalSizeText.innerHTML = totalMB + ' MB';
 
             if (percentComplete < 100) {
-                progressText.innerHTML = percentComplete + '%';
+                timeRemainingText.innerHTML = "Time Remaining: " + formatTime(secondsRemaining);
             } else {
                 progressText.innerHTML = 'Saving File...';
+                timeRemainingText.innerHTML = "Upload Complete, Server Processing...";
             }
         }
     };
 
+    // Helper function to format seconds into MM:SS
+    function formatTime(seconds) {
+        if (!isFinite(seconds) || seconds < 0) return "Calculating...";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}m ${secs}s`;
+    }
+
     // Handle Completion
     xhr.onload = function () {
         if (xhr.status === 200) {
-            // Redirect to the target URL to show the flash message and new file
             const targetUrl = path ? `/${path}?hidden=${showHidden}` : `/?hidden=${showHidden}`;
             window.location.href = targetUrl;
         } else {
@@ -122,7 +152,6 @@ function uploadFile() {
         alert("An Error Occurred during the Upload.");
         container.style.display = 'none';
     };
-
     xhr.open("POST", "/upload", true);
     xhr.send(formData);
 }
