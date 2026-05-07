@@ -1,18 +1,10 @@
-import os, shutil, tempfile
+import shutil
 from flask import Flask, render_template, request, redirect, send_from_directory, abort, flash
 from pathlib import Path
+from paths import BASE_DIR
 
 app = Flask(__name__)
 app.secret_key = "super_secret_key_for_session"
-
-temp_Storage_Path = Path("/home/raspberry_cli/Shared/tmp")
-temp_Storage_Path.mkdir(parents=True, exist_ok=True)
-
-os.environ['TMPDIR'] = str(temp_Storage_Path)
-tempfile.tempdir = str(temp_Storage_Path)
-
-BASE_DIR = Path(r"D:\Media").resolve()
-# BASE_DIR = Path("/home/raspberry_cli").resolve()
 
 def safe_Path(subpath):
     if not subpath:

@@ -1,13 +1,13 @@
 function triggerRename(oldName, index) {
-        let newName = prompt("Rename '" + oldName + "' to:", oldName);
-        
-        if (newName === null || newName.trim() === "" || newName === oldName) {
-            return
-        }
-        const form = document.getElementById('rename-form-' + index);
-        const hiddenInput = document.getElementById('new-name-' + index);
-        hiddenInput.value = newName.trim();
-        form.submit();
+    let newName = prompt("Rename '" + oldName + "' to:", oldName);
+
+    if (newName === null || newName.trim() === "" || newName === oldName) {
+        return
+    }
+    const form = document.getElementById('rename-form-' + index);
+    const hiddenInput = document.getElementById('new-name-' + index);
+    hiddenInput.value = newName.trim();
+    form.submit();
 }
 
 function triggerCreate(type) {
@@ -36,27 +36,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("click", function (e) {
     const clickedMenuBtn = e.target.closest(".menu-btn");
-    
+
     // Close all other menus when clicking outside
     document.querySelectorAll(".menu").forEach(menu => {
         if (!menu.contains(e.target)) {
             menu.classList.remove("open");
-            menu.classList.remove("open-up"); // Reset position
+            menu.classList.remove("open-up")
         }
     });
 
     if (clickedMenuBtn) {
         const menu = clickedMenuBtn.closest(".menu");
         const dropdown = menu.querySelector(".menu-dropdown");
-        
-        // Toggle the 'open' class
         const isOpen = menu.classList.toggle("open");
 
         if (isOpen) {
             // Check if the menu is near the bottom of the screen
             const rect = menu.getBoundingClientRect();
             const spaceBelow = window.innerHeight - rect.bottom;
-            const dropdownHeight = 150; // Approximate height of your menu
+            const dropdownHeight = 150;
 
             if (spaceBelow < dropdownHeight) {
                 menu.classList.add("open-up");
@@ -67,7 +65,7 @@ document.addEventListener("click", function (e) {
     }
 });
 
-document.getElementById('upload-form').addEventListener('submit', function(e) {
+document.getElementById('upload-form').addEventListener('submit', function (e) {
     e.preventDefault();
     uploadFile();
 });
@@ -76,7 +74,7 @@ function uploadFile() {
     const fileInput = document.getElementById('file-input');
     const path = document.getElementById('upload-path').value;
     const showHidden = document.getElementById('show-hidden-state').value;
-    
+
     if (fileInput.files.length === 0) {
         alert("Please select a file first.");
         return;
@@ -96,15 +94,20 @@ function uploadFile() {
     container.style.display = 'block';
 
     // Track Progress
-    xhr.upload.onprogress = function(e) {
+    xhr.upload.onprogress = function (e) {
         if (e.lengthComputable) {
             const percentComplete = Math.round((e.loaded / e.total) * 100);
-            progressText.innerHTML = percentComplete + '%';
+
+            if (percentComplete < 100) {
+                progressText.innerHTML = percentComplete + '%';
+            } else {
+                progressText.innerHTML = 'Saving File...';
+            }
         }
     };
 
     // Handle Completion
-    xhr.onload = function() {
+    xhr.onload = function () {
         if (xhr.status === 200) {
             // Redirect to the target URL to show the flash message and new file
             const targetUrl = path ? `/${path}?hidden=${showHidden}` : `/?hidden=${showHidden}`;
@@ -115,7 +118,7 @@ function uploadFile() {
         }
     };
 
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         alert("An Error Occurred during the Upload.");
         container.style.display = 'none';
     };
