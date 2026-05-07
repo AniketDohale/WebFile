@@ -1,25 +1,21 @@
-import shutil, datetime, os
-from flask import Flask, render_template, request, redirect, send_from_directory, abort, flash, session
+import shutil
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    send_from_directory,
+    abort,
+    flash,
+    session,
+)
 from pathlib import Path
 from paths import BASE_DIR
+from utils import safe_Path, get_Item_Info, save_Uploaded_File
 
 app = Flask(__name__)
+
 app.secret_key = "super_secret_key_for_session"
-
-def safe_Path(subpath):
-    if not subpath:
-        return BASE_DIR
-    path = Path(subpath)
-
-    if path.is_absolute():
-        abort(403)
-
-    full_Path = (BASE_DIR / path).resolve()
-    try:
-        full_Path.relative_to(BASE_DIR)
-    except ValueError:
-        abort(403)
-    return full_Path
 
 
 @app.route("/")
@@ -30,29 +26,30 @@ def browse(subpath=""):
     if not full_Path.exists():
         flash("Folder Not Found")
         return redirect("/")
-    
-    url_hidden_param = request.args.get('hidden')
+
+    url_hidden_param = request.args.get("hidden")
     if url_hidden_param is not None:
-        session['show_hidden'] = (url_hidden_param == 'true')
-    show_Hidden = session.get('show_hidden', False)
+        session["show_hidden"] = url_hidden_param == "true"
+    show_Hidden = session.get("show_hidden", False)
 
     items = []
 
     for item in full_Path.iterdir():
-        if not show_Hidden and item.name.startswith('.'):
+        if not show_Hidden and item.name.startswith("."):
             continue
 
         try:
-            items.append({
-                "name": item.name,
-                "is_dir": item.is_dir()
-            })
-
+            items.append({"name": item.name, "is_dir": item.is_dir()})
         except Exception:
             continue
 
     items.sort(key=lambda x: (not x["is_dir"], x["name"].lower()))
-    return render_template("index.html", items=items, current_path=str(Path(subpath)).replace("\\", "/"), show_Hidden=show_Hidden)
+    return render_template(
+        "index.html",
+        items=items,
+        current_path=str(Path(subpath)).replace("\\", "/"),
+        show_Hidden=show_Hidden,
+    )
 
 
 @app.route("/upload", methods=["POST"])
@@ -60,31 +57,23 @@ def upload():
     subpath = request.form.get("path", "")
     full_Path = safe_Path(subpath)
 
-    if 'file' not in request.files:
+    if "file" not in request.files:
         return "No File Part", 400
-    
+
     file = request.files["file"]
-    if file.filename == '':
+    if file.filename == "":
         return "No File Selected", 400
-    
+
     filename = Path(file.filename).name
     destination = full_Path / filename
 
     if destination.exists():
         return "File Already Exists", 400
-    
-    try:
-        with open(destination, "wb") as f:
-            file.stream.seek(0)
-            while True:
-                chunk = file.stream.read(1024 * 1024) 
-                if not chunk:
-                    break
-                f.write(chunk)
 
+    try:
+        save_Uploaded_File(file, destination)
         flash(f"Uploaded: {filename}")
         return "OK", 200
-
     except Exception as e:
         return str(e), 500
 
@@ -136,14 +125,14 @@ def delete():
     target_path = request.form.get("path")
 
     full_Path = safe_Path(target_path)
-    
+
     if full_Path == BASE_DIR:
         flash("Cannot Delete Root")
         return redirect("/")
 
     try:
         if full_Path.is_file():
-            full_Path.unlink() 
+            full_Path.unlink()
         elif full_Path.is_dir():
             shutil.rmtree(full_Path)
         flash("Item Deleted")
@@ -161,25 +150,20 @@ def view(filepath):
 
     if not full_Path.exists() or not full_Path.is_file():
         abort(404)
-
-    return send_from_directory(
-        directory=full_Path.parent, 
-        path=full_Path.name, 
-        as_attachment=False
-    )
+    return send_from_directory(directory=full_Path.parent, path=full_Path.name, as_attachment=False)
 
 
 @app.route("/create-file", methods=["POST"])
 def create_File():
     subpath = request.form.get("path", "")
     file_Name = request.form.get("file_name")
-    
+
     if not file_Name:
         flash("File Name is Required")
         return redirect(request.referrer)
 
     full_path = safe_Path(subpath) / file_Name
-    
+
     try:
         full_path.touch(exist_ok=False)
         flash(f"File '{file_Name}' Created.")
@@ -196,13 +180,13 @@ def create_File():
 def create_Folder():
     subpath = request.form.get("path", "")
     folder_Name = request.form.get("folder_name")
-    
+
     if not folder_Name:
         flash("Folder Name is Required")
         return redirect(request.referrer)
 
     full_path = safe_Path(subpath) / folder_Name
-    
+
     try:
         full_path.mkdir(exist_ok=False)
         flash(f"Folder '{folder_Name}' Created.")
@@ -215,79 +199,40 @@ def create_Folder():
     return redirect(target_url)
 
 
-def get_dir_size(path):
-    total_size = 0
-    try:
-        for entry in os.scandir(path):
-            if entry.is_file():
-                total_size += entry.stat().st_size
-            elif entry.is_dir():
-                total_size += get_dir_size(entry.path)
-    except (PermissionError, OSError):
-        pass
-    return total_size
-
 @app.route("/info/<path:filepath>")
 def get_info(filepath):
     full_Path = safe_Path(filepath)
     if not full_Path.exists():
         return {"error": "File Not Found"}, 404
-
-    stats = full_Path.stat()
-    
-    if full_Path.is_dir():
-        raw_size = get_dir_size(full_Path)
-        item_type = "Folder"
-    else:
-        raw_size = stats.st_size
-        item_type = "File"
-
-    if raw_size < 1024:
-        display_size = f"{raw_size} Bytes"
-    elif raw_size < 1024**2: 
-        display_size = f"{raw_size / 1024:.2f} KB"
-    elif raw_size < 1024**3:  
-        display_size = f"{raw_size / (1024**2):.2f} MB"
-    elif raw_size < 1024**4:  
-        display_size = f"{raw_size / (1024**3):.2f} GB"
-    else:
-        display_size = f"{raw_size / (1024**4):.2f} TB"
-
-    info = {
-        "name": full_Path.name,
-        "size": display_size,
-        "created": datetime.datetime.fromtimestamp(stats.st_ctime).strftime('%Y-%m-%d %H:%M:%S'),
-        "modified": datetime.datetime.fromtimestamp(stats.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
-        "type": item_type,
-        "extension": full_Path.suffix if full_Path.is_file() else "N/A"
-    }
-    return info
+    return get_Item_Info(full_Path)
 
 
 @app.route("/copy", methods=["POST"])
 def copy():
     path = request.form.get("path")
     if safe_Path(path).exists():
-        session['clipboard'] = path
-        session['clipboard_mode'] = 'copy'
+        session["clipboard"] = path
+        session["clipboard_mode"] = "copy"
         flash(f"Copied to Clipboard")
     return redirect(request.referrer)
+
 
 @app.route("/cut", methods=["POST"])
 def cut():
     path = request.form.get("path")
     if safe_Path(path).exists():
-        session['clipboard'] = path
-        session['clipboard_mode'] = 'cut' 
+        session["clipboard"] = path
+        session["clipboard_mode"] = "cut"
         flash("Ready to Move")
     return redirect(request.referrer)
 
+
 @app.route("/paste", methods=["POST"])
 def paste():
-    source_Path = session.get('clipboard')
-    mode = session.get('clipboard_mode', 'copy')
+    source_Path = session.get("clipboard")
+    mode = session.get("clipboard_mode", "copy")
     dest_Folder = safe_Path(request.form.get("path", ""))
-    
+
     if not source_Path:
         flash("Clipboard is Empty")
         return redirect(request.referrer)
@@ -299,10 +244,10 @@ def paste():
         destination = dest_Folder / f"{full_Source.stem}_copy{full_Source.suffix}"
 
     try:
-        if mode == 'cut':
+        if mode == "cut":
             shutil.move(str(full_Source), str(destination))
-            session.pop('clipboard', None) 
-            session.pop('clipboard_mode', None)
+            session.pop("clipboard", None)
+            session.pop("clipboard_mode", None)
             flash(f"Moved '{full_Source.name}' Successfully")
         else:
             if full_Source.is_dir():
@@ -313,6 +258,7 @@ def paste():
     except Exception as e:
         flash(f"Error: {e}")
     return redirect(request.referrer)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3001, debug=True)
