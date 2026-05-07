@@ -43,6 +43,16 @@
         </div>
 
         <div class="creation-tools">
+            <!-- Create Paste Form -->
+            {% if session.get('clipboard') %}
+            <form action="/paste" method="post">
+                <input type="hidden" name="path" value="{{ current_path }}">
+                <button type="submit" class="icon-creation-btn" title="{{ 'Move' if session.get('clipboard_mode') == 'cut' else 'Paste' }} item here">
+                    <img src="/static/icons/paste.png" alt="Paste"> 
+                </button>
+            </form>
+            {% endif %}
+
             <!-- Create Folder Form -->
             <form action="/create-folder" method="post" id="folder-form">
                 <input type="hidden" name="path" value="{{ current_path }}">
@@ -61,6 +71,7 @@
                 </button>
             </form>
 
+            <!-- Toggle Hidden/Show -->
             {% set toggle_path = current_path.strip('/') %}
             {% if show_Hidden %}
                 <a href="/{{ current_path.strip('/') }}?hidden=false" class="icon-creation-btn" title="Hide Hidden Files">
@@ -140,6 +151,20 @@
                             <input type="hidden" name="path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
                             <button class="icon-btn btn-delete">
                                 Delete
+                            </button>
+                        </form>
+
+                        <form action="/copy" class="icon-form" method="post">
+                            <input type="hidden" name="path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
+                            <button class="icon-btn btn-copy" type="submit">
+                                Copy
+                            </button>
+                        </form>
+
+                        <form action="/cut" class="icon-form" method="post">
+                            <input type="hidden" name="path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
+                            <button class="icon-btn btn-cut" type="submit">
+                                Move
                             </button>
                         </form>
 

@@ -263,5 +263,56 @@ def get_info(filepath):
     }
     return info
 
+
+@app.route("/copy", methods=["POST"])
+def copy():
+    path = request.form.get("path")
+    if safe_Path(path).exists():
+        session['clipboard'] = path
+        session['clipboard_mode'] = 'copy'
+        flash(f"Copied to Clipboard")
+    return redirect(request.referrer)
+
+@app.route("/cut", methods=["POST"])
+def cut():
+    path = request.form.get("path")
+    if safe_Path(path).exists():
+        session['clipboard'] = path
+        session['clipboard_mode'] = 'cut' 
+        flash("Ready to Move")
+    return redirect(request.referrer)
+
+@app.route("/paste", methods=["POST"])
+def paste():
+    source_Path = session.get('clipboard')
+    mode = session.get('clipboard_mode', 'copy')
+    dest_Folder = safe_Path(request.form.get("path", ""))
+    
+    if not source_Path:
+        flash("Clipboard is Empty")
+        return redirect(request.referrer)
+
+    full_Source = safe_Path(source_Path)
+    destination = dest_Folder / full_Source.name
+
+    if destination.exists():
+        destination = dest_Folder / f"{full_Source.stem}_copy{full_Source.suffix}"
+
+    try:
+        if mode == 'cut':
+            shutil.move(str(full_Source), str(destination))
+            session.pop('clipboard', None) 
+            session.pop('clipboard_mode', None)
+            flash(f"Moved '{full_Source.name}' Successfully")
+        else:
+            if full_Source.is_dir():
+                shutil.copytree(full_Source, destination)
+            else:
+                shutil.copy2(full_Source, destination)
+            flash(f"Copied '{full_Source.name}' Successfully")
+    except Exception as e:
+        flash(f"Error: {e}")
+    return redirect(request.referrer)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3001, debug=True)
