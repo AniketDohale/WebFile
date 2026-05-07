@@ -1,4 +1,4 @@
-import shutil
+import shutil, datetime, os
 from flask import Flask, render_template, request, redirect, send_from_directory, abort, flash, session
 from pathlib import Path
 from paths import BASE_DIR
@@ -213,6 +213,55 @@ def create_Folder():
 
     target_url = f"/{subpath}" if subpath else "/"
     return redirect(target_url)
+
+
+def get_dir_size(path):
+    total_size = 0
+    try:
+        for entry in os.scandir(path):
+            if entry.is_file():
+                total_size += entry.stat().st_size
+            elif entry.is_dir():
+                total_size += get_dir_size(entry.path)
+    except (PermissionError, OSError):
+        pass
+    return total_size
+
+@app.route("/info/<path:filepath>")
+def get_info(filepath):
+    full_Path = safe_Path(filepath)
+    if not full_Path.exists():
+        return {"error": "File Not Found"}, 404
+
+    stats = full_Path.stat()
+    
+    if full_Path.is_dir():
+        raw_size = get_dir_size(full_Path)
+        item_type = "Folder"
+    else:
+        raw_size = stats.st_size
+        item_type = "File"
+
+    if raw_size < 1024:
+        display_size = f"{raw_size} Bytes"
+    elif raw_size < 1024**2: 
+        display_size = f"{raw_size / 1024:.2f} KB"
+    elif raw_size < 1024**3:  
+        display_size = f"{raw_size / (1024**2):.2f} MB"
+    elif raw_size < 1024**4:  
+        display_size = f"{raw_size / (1024**3):.2f} GB"
+    else:
+        display_size = f"{raw_size / (1024**4):.2f} TB"
+
+    info = {
+        "name": full_Path.name,
+        "size": display_size,
+        "created": datetime.datetime.fromtimestamp(stats.st_ctime).strftime('%Y-%m-%d %H:%M:%S'),
+        "modified": datetime.datetime.fromtimestamp(stats.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
+        "type": item_type,
+        "extension": full_Path.suffix if full_Path.is_file() else "N/A"
+    }
+    return info
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3001, debug=True)

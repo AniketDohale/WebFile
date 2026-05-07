@@ -102,18 +102,15 @@ function uploadFile() {
         if (e.lengthComputable) {
             const percentComplete = Math.round((e.loaded / e.total) * 100);
 
-            // 1. Calculate Sizes (convert bytes to MB)
             const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
             const totalMB = (e.total / (1024 * 1024)).toFixed(2);
 
-            // 2. Calculate Estimated Time
             const currentTime = new Date().getTime();
             const durationInSeconds = (currentTime - startTime) / 1000;
             const bitsPerSecond = e.loaded / durationInSeconds;
             const remainingBytes = e.total - e.loaded;
             const secondsRemaining = remainingBytes / bitsPerSecond;
 
-            // Update UI
             progressText.innerHTML = percentComplete + '%';
             uploadedSizeText.innerHTML = loadedMB + ' MB';
             totalSizeText.innerHTML = totalMB + ' MB';
@@ -158,4 +155,26 @@ function uploadFile() {
     };
     xhr.open("POST", "/upload", true);
     xhr.send(formData);
+}
+
+async function showFileInfo(filePath) {
+    try {
+        const response = await fetch(`/info/${filePath}`);
+        if (!response.ok) throw new Error("Could Not Fetch File Info");
+        
+        const data = await response.json();
+        
+        const details = `
+            Name: ${data.name}
+            Type: ${data.type}
+            Size: ${data.size}
+            Created: ${data.created}
+            Modified: ${data.modified}
+            Extension: ${data.extension}
+        `;
+        
+        alert(details);
+    } catch (error) {
+        alert("Error: " + error.message);
+    }
 }

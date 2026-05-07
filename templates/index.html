@@ -143,6 +143,10 @@
                             </button>
                         </form>
 
+                        <button class="icon-btn btn-info" onclick="showFileInfo('{{ (current_path ~ '/' ~ item.name).strip('/') }}')">
+                            Information
+                        </button>
+
                         {% if not item.is_dir %}
                             <a class="icon-btn btn-download" href="/download/{{ (current_path ~ '/' ~ item.name).strip('/') }}"
                                 title="Download">
