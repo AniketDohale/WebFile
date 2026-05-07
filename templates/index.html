@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FilePi</title>
+    <title>WebFile</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
 </head>
 
@@ -183,6 +183,45 @@
                
             </div>
             {% endfor %}
+        </div>
+    </div>
+    <!-- File Info Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3>Details</h3>
+            <hr>
+            <div class="modal-body">
+                <div class="info-row">
+                    <strong>Name:</strong>
+                    <span id="info-name"></span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Type:</strong>
+                    <span id="info-type"></span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Size:</strong>
+                    <span id="info-size"></span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Extension:</strong>
+                    <span id="info-extension"></span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Created:</strong>
+                    <span id="info-created"></span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Modified:</strong>
+                    <span id="info-modified"></span>
+                </div>
+            </div>
         </div>
     </div>
     <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>

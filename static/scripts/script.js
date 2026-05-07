@@ -158,23 +158,40 @@ function uploadFile() {
 }
 
 async function showFileInfo(filePath) {
+    const modal = document.getElementById('infoModal');
+    
     try {
         const response = await fetch(`/info/${filePath}`);
         if (!response.ok) throw new Error("Could Not Fetch File Info");
         
         const data = await response.json();
         
-        const details = `
-            Name: ${data.name}
-            Type: ${data.type}
-            Size: ${data.size}
-            Created: ${data.created}
-            Modified: ${data.modified}
-            Extension: ${data.extension}
-        `;
+        // Populate the modal fields
+        document.getElementById('info-name').textContent = data.name;
+        document.getElementById('info-type').textContent = data.type;
+        document.getElementById('info-size').textContent = data.size;
+        document.getElementById('info-created').textContent = data.created;
+        document.getElementById('info-modified').textContent = data.modified;
+        document.getElementById('info-extension').textContent = data.extension;
         
-        alert(details);
+        // Show the modal
+        modal.style.display = 'flex';
+
     } catch (error) {
         alert("Error: " + error.message);
+    }
+}
+
+// Function to close the modal
+function closeModal() {
+    document.getElementById('infoModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal if user clicks anywhere outside of the modal content
+window.onclick = function(event) {
+    const modal = document.getElementById('infoModal');
+    if (event.target == modal) {
+        closeModal();
     }
 }
