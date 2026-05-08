@@ -88,11 +88,11 @@
         <div class="breadcrumb">
             <a href="/">Home</a>
             {% set parts = current_path.split('/') if current_path else [] %}
-            {% set path_acc = '' %}
+            {% set ns = namespace(path='') %}
 
             {% for part in parts %}
-            {% set path_acc = path_acc + '/' + part %}
-            / <a href="{{ path_acc }}">{{ part }}</a>
+                {% set ns.path = ns.path + '/' + part %}
+                / <a href="{{ ns.path }}">{{ part }}</a>
             {% endfor %}
         </div>
 
