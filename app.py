@@ -7,8 +7,7 @@ from flask import (
     send_from_directory,
     abort,
     flash,
-    session,
-    make_response
+    session
 )
 
 from pathlib import Path
@@ -264,16 +263,6 @@ def paste():
     except Exception as e:
         flash(f"Error: {e}")
     return redirect(request.referrer)
-
-
-@app.route('/sw.js')
-def serve_sw():
-    response = make_response(
-        send_from_directory('static', 'sw.js')
-    )
-    response.headers['Content-Type'] = 'application/javascript'
-    return response
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=4000, debug=True)
