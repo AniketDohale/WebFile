@@ -1,8 +1,9 @@
-import os
-import datetime
+import os, datetime
 from pathlib import Path
 from flask import abort
 from paths import BASE_DIR
+
+TASK_PROGRESS = {}
 
 
 def safe_Path(subpath):
@@ -75,3 +76,60 @@ def save_Uploaded_File(file, destination):
             if not chunk:
                 break
             f.write(chunk)
+
+
+def get_Total_Size(path):
+    if path.is_file():
+        return path.stat().st_size
+    total = 0
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            fp = Path(root) / file
+            try:
+                total += fp.stat().st_size
+            except Exception:
+                pass
+    return total
+
+
+def copy_With_Progress(src, dst, task_id):
+    total_size = get_Total_Size(src)
+    copied_size = 0
+
+    TASK_PROGRESS[task_id] = {"progress": 0, "status": "running"}
+
+    def copy_file(source, destination):
+        nonlocal copied_size
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with open(source, "rb") as fsrc:
+            with open(destination, "wb") as fdst:
+                while True:
+                    chunk = fsrc.read(1024 * 1024)
+
+                    if not chunk:
+                        break
+
+                    fdst.write(chunk)
+                    copied_size += len(chunk)
+                    progress = int((copied_size / total_size) * 100)
+                    TASK_PROGRESS[task_id]["progress"] = progress
+
+    try:
+        if src.is_file():
+            copy_file(src, dst)
+        else:
+            for root, dirs, files in os.walk(src):
+                relative = Path(root).relative_to(src)
+                target_root = dst / relative
+                target_root.mkdir(parents=True, exist_ok=True)
+                for file in files:
+
+                    source_file = Path(root) / file
+                    target_file = target_root / file
+                    copy_file(source_file, target_file)
+        TASK_PROGRESS[task_id]["progress"] = 100
+        TASK_PROGRESS[task_id]["status"] = "completed"
+
+    except Exception as e:
+        TASK_PROGRESS[task_id]["status"] = "error"
+        TASK_PROGRESS[task_id]["error"] = str(e)

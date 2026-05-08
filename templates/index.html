@@ -43,12 +43,15 @@
         </div>
 
         <div class="creation-tools">
+            <div id="paste-progress" style="display:none;">
+                <div id="paste-progress-text">0%</div>
+            </div>
             <!-- Create Paste Form -->
             {% if session.get('clipboard') %}
-            <form action="/paste" method="post">
+            <form id="paste-form">
                 <input type="hidden" name="path" value="{{ current_path }}">
-                <button type="submit" class="icon-creation-btn" title="{{ 'Move' if session.get('clipboard_mode') == 'cut' else 'Paste' }} item here">
-                    <img src="/static/icons/paste.png" alt="Paste"> 
+                <button type="submit" class="icon-creation-btn">
+                    <img src="/static/icons/paste.png" alt="Paste">
                 </button>
             </form>
             {% endif %}

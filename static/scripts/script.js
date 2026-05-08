@@ -207,3 +207,45 @@ window.onclick = function (event) {
         closeRenameModal();
     }
 }
+
+const pasteForm = document.getElementById("paste-form");
+if (pasteForm) {
+    pasteForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const formData = new FormData(pasteForm);
+        const response = await fetch("/paste", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+        const taskId = data.task_id;
+        const progressBox = document.getElementById("paste-progress");
+        const progressText = document.getElementById("paste-progress-text");
+
+        progressBox.style.display = "block";
+
+        const interval = setInterval(async () => {
+            const res = await fetch(`/progress/${taskId}`);
+            const progressData = await res.json();
+            progressText.innerText =
+                `${progressData.progress || 0}%`;
+
+            if (
+                progressData.status === "completed"
+            ) {
+                clearInterval(interval);
+                progressText.innerText = "Completed";
+                location.reload();
+            }
+
+            if (
+                progressData.status === "error"
+            ) {
+                clearInterval(interval);
+                progressText.innerText =
+                    "Error";
+            }
+        }, 500);
+    });
+}

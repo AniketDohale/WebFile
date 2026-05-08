@@ -1,4 +1,4 @@
-import shutil
+import shutil, threading, uuid
 from flask import (
     Flask,
     render_template,
@@ -7,12 +7,18 @@ from flask import (
     send_from_directory,
     abort,
     flash,
-    session
+    session,
 )
 
 from pathlib import Path
 from paths import BASE_DIR
-from utils import safe_Path, get_Item_Info, save_Uploaded_File
+from utils import (
+    safe_Path,
+    get_Item_Info,
+    save_Uploaded_File,
+    copy_With_Progress,
+    TASK_PROGRESS,
+)
 
 app = Flask(__name__)
 
@@ -215,21 +221,21 @@ def get_info(filepath):
 @app.route("/copy", methods=["POST"])
 def copy():
     path = request.form.get("path")
-    if safe_Path(path).exists():
+    if path:
         session["clipboard"] = path
         session["clipboard_mode"] = "copy"
-        flash(f"Copied to Clipboard")
-    return redirect(request.referrer)
+        flash("Copied to Clipboard")
+    return redirect(request.referrer or "/")
 
 
 @app.route("/cut", methods=["POST"])
 def cut():
     path = request.form.get("path")
-    if safe_Path(path).exists():
+    if path:
         session["clipboard"] = path
         session["clipboard_mode"] = "cut"
         flash("Ready to Move")
-    return redirect(request.referrer)
+    return redirect(request.referrer or "/")
 
 
 @app.route("/paste", methods=["POST"])
@@ -239,8 +245,7 @@ def paste():
     dest_Folder = safe_Path(request.form.get("path", ""))
 
     if not source_Path:
-        flash("Clipboard is Empty")
-        return redirect(request.referrer)
+        return {"error": "Clipboard Empty"}, 400
 
     full_Source = safe_Path(source_Path)
     destination = dest_Folder / full_Source.name
@@ -248,21 +253,31 @@ def paste():
     if destination.exists():
         destination = dest_Folder / f"{full_Source.stem}_copy{full_Source.suffix}"
 
-    try:
-        if mode == "cut":
-            shutil.move(str(full_Source), str(destination))
-            session.pop("clipboard", None)
-            session.pop("clipboard_mode", None)
-            flash(f"Moved '{full_Source.name}' Successfully")
-        else:
-            if full_Source.is_dir():
-                shutil.copytree(full_Source, destination)
-            else:
-                shutil.copy2(full_Source, destination)
-            flash(f"Copied '{full_Source.name}' Successfully")
-    except Exception as e:
-        flash(f"Error: {e}")
-    return redirect(request.referrer)
+    task_id = str(uuid.uuid4())
+
+    def task():
+        try:
+            copy_With_Progress(full_Source, destination, task_id)
+            if mode == "cut":
+                if full_Source.is_dir():
+                    shutil.rmtree(full_Source)
+                else:
+                    full_Source.unlink()
+        except Exception as e:
+            TASK_PROGRESS[task_id] = {"status": "error", "error": str(e)}
+    threading.Thread(target=task).start()
+
+    # CLEAR SESSION HERE
+    if mode == "cut":
+        session.pop("clipboard", None)
+        session.pop("clipboard_mode", None)
+    return {"task_id": task_id}
+
+
+@app.route("/progress/<task_id>")
+def progress(task_id):
+    return TASK_PROGRESS.get(task_id, {"status": "not_found"})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=4000, debug=True)
