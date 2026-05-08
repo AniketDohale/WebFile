@@ -209,6 +209,7 @@ h2 {
 }
 
 .menu-dropdown .icon-btn {
+    -webkit-tap-highlight-color: transparent;
     display: block;
     width: 100%;
     box-sizing: border-box;
@@ -372,6 +373,7 @@ h2 {
 }
 
 .rename-action .rename-action-button {
+    -webkit-tap-highlight-color: transparent;
     border-radius: 5px;
     padding: 8px;
     background-color: #e8f0fe;
