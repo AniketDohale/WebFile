@@ -8,6 +8,7 @@ from flask import (
     abort,
     flash,
     session,
+    make_response
 )
 
 from pathlib import Path
@@ -267,7 +268,11 @@ def paste():
 
 @app.route('/sw.js')
 def serve_sw():
-    return send_from_directory(app.static_folder, 'sw.js')
+    response = make_response(
+        send_from_directory('static', 'sw.js')
+    )
+    response.headers['Content-Type'] = 'application/javascript'
+    return response
 
 
 if __name__ == "__main__":
