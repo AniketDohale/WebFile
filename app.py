@@ -86,7 +86,9 @@ def download(filepath):
     if not full_Path.exists() or not full_Path.is_file():
         flash("Folder Not Found")
         return redirect("/")
-    return send_from_directory(directory=full_Path.parent, path=full_Path.name, as_attachment=True)
+    return send_from_directory(
+        directory=full_Path.parent, path=full_Path.name, as_attachment=True
+    )
 
 
 @app.route("/rename", methods=["POST"])
@@ -151,7 +153,9 @@ def view(filepath):
 
     if not full_Path.exists() or not full_Path.is_file():
         abort(404)
-    return send_from_directory(directory=full_Path.parent, path=full_Path.name, as_attachment=False)
+    return send_from_directory(
+        directory=full_Path.parent, path=full_Path.name, as_attachment=False
+    )
 
 
 @app.route("/create-file", methods=["POST"])

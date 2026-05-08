@@ -141,8 +141,8 @@
                     <div class="menu-dropdown">
                         <form action="/rename" class="icon-form" method="post" id="rename-form-{{ loop.index }}">
                             <input type="hidden" name="old_path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
-                            <input type="hidden" name="new_name" placeholder="Rename" id="new-name-{{ loop.index }}" required>
-                            <button class="icon-btn btn-rename" onclick="triggerRename('{{ item.name }}', '{{ loop.index }}')">
+                            <input type="hidden" name="new_name" id="new-name-{{ loop.index }}" required>
+                            <button type="button" class="icon-btn btn-rename" onclick="triggerRename('{{ item.name }}', '{{ loop.index }}')">
                                 Rename
                             </button>
                         </form>
@@ -220,6 +220,24 @@
                 <div class="info-row">
                     <strong>Modified:</strong>
                     <span id="info-modified"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rename Modal -->
+    <div id="renameModal" class="modal">
+        <div class="modal-content">
+            <h3>Rename</h3>
+            <hr>
+            <div class="modal-body">
+                <div class="info-row">
+                    <input type="text" id="modal-rename-input">
+                </div>
+                <input type="hidden" id="modal-target-index">
+                <div class="rename-action">
+                    <button class="rename-action-button" onclick="closeRenameModal()">Cancel</button>
+                    <button class="rename-action-button" onclick="submitRenameModal()">Save Changes</button>
                 </div>
             </div>
         </div>

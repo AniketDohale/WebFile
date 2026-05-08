@@ -20,7 +20,7 @@ elif SYSTEM == "Linux":
 
     tempfile.tempdir = str(TEMP_DIR)
 
-print("*"*80)
+print("*" * 80)
 print("SYSTEM:", SYSTEM)
 print("BASE_DIR:", BASE_DIR)
 
@@ -28,4 +28,4 @@ if SYSTEM != "Windows":
     print("TEMP_DIR:", TEMP_DIR)
 else:
     print("Using System Default Temp", tempfile.gettempdir())
-print("*"*80)
+print("*" * 80)

@@ -75,10 +75,9 @@ h2 {
     justify-content: center;
     width: 36px;
     height: 36px;
-    border: none;
     border-radius: 8px;
     cursor: pointer;
-    background-color: #e8f0fe; 
+    background-color: #e8f0fe;
     transition: background 0.2s, transform 0.1s;
     text-decoration: none;
     opacity: 0.7;
@@ -92,7 +91,7 @@ h2 {
 }
 
 .btn-upload img {
-    height: 20px; 
+    height: 20px;
     width: 20px;
     object-fit: contain;
     display: block;
@@ -100,9 +99,9 @@ h2 {
 
 .creation-tools {
     display: flex;
-    justify-content: flex-end; 
+    justify-content: flex-end;
     align-items: center;
-    gap: 5px; 
+    gap: 5px;
     margin: 0 5px 10px 0;
 }
 
@@ -234,7 +233,7 @@ h2 {
 }
 
 .menu.open.open-up .menu-dropdown {
-    top: auto;       
+    top: auto;
     bottom: 110%;
 }
 
@@ -308,9 +307,9 @@ h2 {
     width: 100%;
     max-width: 450px;
     border-radius: 5px;
-    padding: 30px 30px 10px 30px;
+    padding: 0 30px 10px 30px;
     position: relative;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 }
 
 .close-modal {
@@ -339,7 +338,7 @@ h2 {
     gap: 8px;
     margin-bottom: 10px;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .info-row:last-child {
@@ -355,4 +354,34 @@ h2 {
     flex: 1;
     word-break: break-word;
     overflow-wrap: anywhere;
+}
+
+#modal-rename-input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.rename-action {
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.rename-action .rename-action-button {
+    border-radius: 5px;
+    padding: 8px;
+    background-color: #e8f0fe;
+    opacity: 0.7;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.rename-action .rename-action-button:hover{
+    background-color: #d2e3fc;
+    opacity: 1;
 }

@@ -1,26 +1,33 @@
+// Function to open the rename modal
 function triggerRename(oldName, index) {
-    let newName = prompt("Rename '" + oldName + "' to:", oldName);
+    const modal = document.getElementById('renameModal');
+    const input = document.getElementById('modal-rename-input');
+    const indexStore = document.getElementById('modal-target-index');
 
-    if (newName === null || newName.trim() === "" || newName === oldName) {
-        return
+    input.value = oldName;
+    indexStore.value = index;
+
+    modal.style.display = 'flex';
+    
+    // Focus the Input Automatically
+    // setTimeout(() => input.select(), 100);
+}
+
+function submitRenameModal() {
+    const index = document.getElementById('modal-target-index').value;
+    const newName = document.getElementById('modal-rename-input').value.trim();
+    if (!newName) {
+        alert("Name Cannot be Empty");
+        return;
     }
     const form = document.getElementById('rename-form-' + index);
     const hiddenInput = document.getElementById('new-name-' + index);
-    hiddenInput.value = newName.trim();
+    hiddenInput.value = newName;
     form.submit();
 }
 
-function triggerCreate(type) {
-    let name = prompt(`Enter ${type} Name:`);
-    if (name && name.trim() !== "") {
-        if (type === 'folder') {
-            document.getElementById('folder-name-input').value = name;
-            document.getElementById('folder-form').submit();
-        } else {
-            document.getElementById('file-name-input').value = name;
-            document.getElementById('file-form').submit();
-        }
-    }
+function closeRenameModal() {
+    document.getElementById('renameModal').style.display = 'none';
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -159,13 +166,13 @@ function uploadFile() {
 
 async function showFileInfo(filePath) {
     const modal = document.getElementById('infoModal');
-    
+
     try {
         const response = await fetch(`/info/${filePath}`);
         if (!response.ok) throw new Error("Could Not Fetch File Info");
-        
+
         const data = await response.json();
-        
+
         // Populate the modal fields
         document.getElementById('info-name').textContent = data.name;
         document.getElementById('info-type').textContent = data.type;
@@ -173,7 +180,7 @@ async function showFileInfo(filePath) {
         document.getElementById('info-created').textContent = data.created;
         document.getElementById('info-modified').textContent = data.modified;
         document.getElementById('info-extension').textContent = data.extension;
-        
+
         // Show the modal
         modal.style.display = 'flex';
 
@@ -188,10 +195,15 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-// Close modal if user clicks anywhere outside of the modal content
-window.onclick = function(event) {
-    const modal = document.getElementById('infoModal');
-    if (event.target == modal) {
+// Close Modal if User Clicks anywhere Outside of the Modal
+window.onclick = function (event) {
+    const infoModal = document.getElementById('infoModal');
+    const renameModal = document.getElementById('renameModal');
+    
+    if (event.target == infoModal) {
         closeModal();
+    }
+    if (event.target == renameModal) {
+        closeRenameModal();
     }
 }
