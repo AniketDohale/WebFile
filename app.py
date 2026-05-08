@@ -265,5 +265,10 @@ def paste():
     return redirect(request.referrer)
 
 
+@app.route('/sw.js')
+def serve_sw():
+    return send_from_directory(app.static_folder, 'sw.js')
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=4000, debug=True)
