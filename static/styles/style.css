@@ -135,12 +135,22 @@ h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
+    padding: 12px 14px;
     border-bottom: 1px solid #eee;
 }
 
+
 .file-row:hover {
     background: #f9fafb;
+}
+
+.file-row:first-child {
+    border-radius: 10px 10px 0 0;
+}
+
+.file-row:last-child {
+    border-bottom: none;
+     border-radius: 0 0 10px 10px;
 }
 
 .file-name {
