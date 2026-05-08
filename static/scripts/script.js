@@ -8,7 +8,7 @@ function triggerRename(oldName, index) {
     indexStore.value = index;
 
     modal.style.display = 'flex';
-    
+
     // Focus the Input Automatically
     // setTimeout(() => input.select(), 100);
 }
@@ -28,6 +28,19 @@ function submitRenameModal() {
 
 function closeRenameModal() {
     document.getElementById('renameModal').style.display = 'none';
+}
+
+function triggerCreate(type) {
+    let name = prompt(`Enter ${type} Name:`);
+    if (name && name.trim() !== "") {
+        if (type === 'folder') {
+            document.getElementById('folder-name-input').value = name;
+            document.getElementById('folder-form').submit();
+        } else {
+            document.getElementById('file-name-input').value = name;
+            document.getElementById('file-form').submit();
+        }
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -199,7 +212,7 @@ function closeModal() {
 window.onclick = function (event) {
     const infoModal = document.getElementById('infoModal');
     const renameModal = document.getElementById('renameModal');
-    
+
     if (event.target == infoModal) {
         closeModal();
     }
