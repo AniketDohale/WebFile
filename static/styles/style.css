@@ -400,6 +400,10 @@ h2 {
 }
 
 /* Grid Style */
+.grid-preload #file-list {
+    display: grid;
+}
+
 .file-list.grid-view {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
