@@ -56,6 +56,10 @@
             </form>
             {% endif %}
 
+            <button id="layout-toggle" class="icon-creation-btn" title="Toggle Layout">
+                <img id="layout-icon" src="/static/icons/grid.png" alt="Toggle Layout">
+            </button>
+
             <!-- Create Folder Form -->
             <form action="/create-folder" method="post" id="folder-form">
                 <input type="hidden" name="path" value="{{ current_path }}">
@@ -100,14 +104,14 @@
         </div>
 
         <!-- Files -->
-        <div class="file-list">
+        <div class="file-list" id="file-list">
 
             {% for item in items %}
-            <div class="file-row">
+            <div class="file-row" data-href="{% if item.is_dir %}/{{ (current_path ~ '/' ~ item.name).strip('/') }}{% else %}/view/{{ (current_path ~ '/' ~ item.name).strip('/') }}{% endif %}">
 
                 <div class="file-name">
                     {% if item.is_dir %}
-                        📁 <a href="/{{ (current_path ~ '/' ~ item.name).strip('/') }}">{{ item.name }}</a>
+                        📁 <a href="/{{ (current_path ~ '/' ~ item.name).strip('/') }}" title="{{ item.name }}">{{ item.name }}</a>
                     {% else %}
                         {# Extract extension and check types #}
                         {% set ext = item.name.split('.')[-1].lower() %}
@@ -130,7 +134,7 @@
                             📄
                         {% endif %}
                         
-                        <a href="/view/{{ (current_path ~ '/' ~ item.name).strip('/') }}" target="_blank" class="view-link">
+                        <a href="/view/{{ (current_path ~ '/' ~ item.name).strip('/') }}" target="_blank" class="view-link" title="{{ item.name }}">
                             {{ item.name }}
                         </a>
                     {% endif %}

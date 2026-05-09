@@ -137,8 +137,8 @@ h2 {
     align-items: center;
     padding: 12px 14px;
     border-bottom: 1px solid #eee;
+    cursor: pointer;
 }
-
 
 .file-row:hover {
     background: #f9fafb;
@@ -164,7 +164,7 @@ h2 {
 
 .file-name a {
     text-decoration: none;
-    color: #1a73e8;
+    color: #000000;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -396,4 +396,75 @@ h2 {
 .rename-action .rename-action-button:hover{
     background-color: #d2e3fc;
     opacity: 1;
+}
+
+/* Grid Style */
+.file-list.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    background: transparent;
+    box-shadow: none;
+}
+
+.file-list.grid-view .file-row {
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: #fff;
+    border-radius: 10px;
+    border: none;
+    padding: 14px 10px;
+    min-height: 100px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.file-list.grid-view .file-row:hover {
+    background: #f8fafc;
+}
+
+.file-list.grid-view .file-name {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.file-list.grid-view .file-name a {
+    display: block;
+    width: 100px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    text-align: center;
+    font-size: 14px;
+}
+
+.file-list.grid-view .menu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    margin: 0;
+}
+
+.file-list.grid-view .menu-dropdown {
+    right: 0;
+    transform: none;
+}
+
+.file-list.grid-view .file-name {
+    font-size: 42px;
+}
+
+.file-list.grid-view .file-name a {
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+    .file-list.grid-view {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
