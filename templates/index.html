@@ -5,8 +5,14 @@
     <title>WebFile</title>
 
     <script>
-        const savedLayout = localStorage.getItem("layout");
-        if (savedLayout === "grid") {document.documentElement.classList.add("grid-preload");}
+        // Use a blocking script to check storage immediately
+        (function() {
+            const savedLayout = localStorage.getItem("layout");
+            if (savedLayout === "grid") {
+                // Add class to <html> so it's available before <body> is parsed
+                document.documentElement.classList.add("grid-layout-active");
+            }
+        })();
     </script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">

@@ -271,17 +271,17 @@ const layoutIcon = document.getElementById("layout-icon");
 
 function applyLayout() {
     const savedLayout = localStorage.getItem("layout");
+    const htmlEl = document.documentElement;
 
     if (savedLayout === "grid") {
         fileList.classList.add("grid-view");
+        htmlEl.classList.add("grid-layout-active"); // Keep sync
         layoutIcon.src = "/static/icons/list.png";
     } else {
         fileList.classList.remove("grid-view");
+        htmlEl.classList.remove("grid-layout-active");
         layoutIcon.src = "/static/icons/grid.png";
     }
-
-    // Remove preload helper after real layout applied
-    document.documentElement.classList.remove("grid-preload");
 }
 
 applyLayout();
@@ -292,8 +292,10 @@ layoutToggle.addEventListener("click", () => {
     const isCurrentlyGrid = fileList.classList.contains("grid-view");
     if (isCurrentlyGrid) {
         localStorage.setItem("layout", "list");
+        document.documentElement.classList.remove("grid-layout-active"); // Add this
     } else {
         localStorage.setItem("layout", "grid");
+        document.documentElement.classList.add("grid-layout-active"); // Add this
     }
     applyLayout();
 });
