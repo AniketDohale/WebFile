@@ -269,38 +269,41 @@ const fileList = document.getElementById("file-list");
 const layoutToggle = document.getElementById("layout-toggle");
 const layoutIcon = document.getElementById("layout-icon");
 
-const savedLayout = localStorage.getItem("layout");
+function applyLayout() {
+    const savedLayout = localStorage.getItem("layout");
 
-if (savedLayout === "grid") {
-    fileList.classList.add("grid-view");
-    layoutIcon.src = "/static/icons/list.png";
-} else {
-    layoutIcon.src = "/static/icons/grid.png";
-}
-
-layoutToggle.addEventListener("click", () => {
-    fileList.classList.toggle("grid-view");
-    const isGrid = fileList.classList.contains("grid-view");
-
-    if (isGrid) {
-        localStorage.setItem("layout", "grid");
+    if (savedLayout === "grid") {
+        fileList.classList.add("grid-view");
         layoutIcon.src = "/static/icons/list.png";
     } else {
-        localStorage.setItem("layout", "list");
+        fileList.classList.remove("grid-view");
         layoutIcon.src = "/static/icons/grid.png";
     }
+
+    // Remove preload helper after real layout applied
+    document.documentElement.classList.remove("grid-preload");
+}
+
+applyLayout();
+
+window.addEventListener("pageshow", applyLayout);
+
+layoutToggle.addEventListener("click", () => {
+    const isCurrentlyGrid = fileList.classList.contains("grid-view");
+    if (isCurrentlyGrid) {
+        localStorage.setItem("layout", "list");
+    } else {
+        localStorage.setItem("layout", "grid");
+    }
+    applyLayout();
 });
 
-// Make file rows clickable except menu area
+// Make File Rows Clickable except Menu
 document.addEventListener("click", function (e) {
-
-    // Ignore clicks inside menu
     if (e.target.closest(".menu")) {
         return;
     }
-
     const row = e.target.closest(".file-row");
-
     if (row && row.dataset.href) {
         window.location.href = row.dataset.href;
     }
