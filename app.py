@@ -44,6 +44,9 @@ def browse(subpath=""):
         if not show_Hidden and item.name.startswith("."):
             continue
 
+        if item.name.endswith(".part"):
+            continue
+
         try:
             items.append({"name": item.name, "is_dir": item.is_dir()})
         except Exception:
@@ -60,23 +63,30 @@ def browse(subpath=""):
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    subpath = request.form.get("path", "")
+
+    subpath = request.args.get("path", "")
     full_Path = safe_Path(subpath)
 
     filename = request.headers.get("X-Filename")
 
     if not filename:
-        return "Missing Filename", 400
+        return "Missing filename", 400
 
     filename = Path(filename).name
-    destination = full_Path / filename
 
-    if destination.exists():
+    final_destination = full_Path / filename
+
+    if final_destination.exists():
         return "File Already Exists", 400
 
+    temp_destination = full_Path / (filename + ".part")
+
     try:
-        with open(destination, "wb") as f:
+
+        with open(temp_destination, "wb") as f:
+
             while True:
+
                 chunk = request.stream.read(1024 * 1024)
 
                 if not chunk:
@@ -84,10 +94,20 @@ def upload():
 
                 f.write(chunk)
 
+        temp_destination.rename(final_destination)
+
         flash(f"Uploaded: {filename}")
+
         return "OK", 200
 
     except Exception as e:
+
+        try:
+            if temp_destination.exists():
+                temp_destination.unlink()
+        except Exception:
+            pass
+
         return str(e), 500
 
 
