@@ -334,6 +334,9 @@ document.addEventListener("click", function (e) {
     if (e.target.closest(".menu")) {
         return;
     }
+    if (e.target.closest("a")) {
+        return;
+    }
     const row = e.target.closest(".file-row");
     if (row && row.dataset.href) {
         window.location.href = row.dataset.href;
