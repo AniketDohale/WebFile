@@ -35,14 +35,15 @@
 
         <!-- Upload -->
         <div class="panel">
-            <form action="/upload" method="post" enctype="multipart/form-data" class="upload" id="upload-form">
-                <input type="hidden" name="path" value="{{ current_path }}" id="upload-path">
-                <input type="file" name="file" id="file-input" required>
+           <div class="upload" id="upload-form">
+                <input type="hidden" id="upload-path" value="{{ current_path }}">
 
-                <button type="submit" class="btn-upload" title="Upload">
+                <input type="file" id="file-input" required>
+
+                <button type="button" class="btn-upload" id="upload-btn" title="Upload">
                     <img src="/static/icons/upload.png" alt="Upload">
                 </button>
-            </form>
+            </div>
 
             <div id="progress-container" style="display:none;">
                 <div id="progress-text">0%</div>

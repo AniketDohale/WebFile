@@ -85,14 +85,14 @@ document.addEventListener("click", function (e) {
     }
 });
 
-document.getElementById('upload-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    uploadFile();
-});
+const uploadBtn = document.getElementById("upload-btn");
+
+uploadBtn.addEventListener("click", uploadFile);
 
 function uploadFile() {
-    const fileInput = document.getElementById('file-input');
-    const path = document.getElementById('upload-path').value;
+
+    const fileInput = document.getElementById("file-input");
+    const path = document.getElementById("upload-path").value;
 
     if (fileInput.files.length === 0) {
         alert("Please select a file first.");
@@ -100,81 +100,124 @@ function uploadFile() {
     }
 
     const file = fileInput.files[0];
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("path", path);
 
     const xhr = new XMLHttpRequest();
-    const container = document.getElementById('progress-container');
-    const progressText = document.getElementById('progress-text');
 
-    // New Elements
-    const uploadedSizeText = document.getElementById('uploaded-size');
-    const totalSizeText = document.getElementById('total-size');
-    const timeRemainingText = document.getElementById('time-remaining');
+    const container = document.getElementById("progress-container");
+    const progressText = document.getElementById("progress-text");
 
-    container.style.display = 'block';
+    const uploadedSizeText = document.getElementById("uploaded-size");
+    const totalSizeText = document.getElementById("total-size");
+    const timeRemainingText = document.getElementById("time-remaining");
 
-    // Track start time
-    const startTime = new Date().getTime();
+    container.style.display = "block";
+
+    const startTime = Date.now();
 
     xhr.upload.onprogress = function (e) {
-        if (e.lengthComputable) {
-            const percentComplete = Math.round((e.loaded / e.total) * 100);
 
-            const loadedMB = (e.loaded / (1024 * 1024)).toFixed(2);
-            const totalMB = (e.total / (1024 * 1024)).toFixed(2);
+        if (!e.lengthComputable) return;
 
-            const currentTime = new Date().getTime();
-            const durationInSeconds = (currentTime - startTime) / 1000;
-            const bitsPerSecond = e.loaded / durationInSeconds;
-            const remainingBytes = e.total - e.loaded;
-            const secondsRemaining = remainingBytes / bitsPerSecond;
+        const percentComplete =
+            Math.round((e.loaded / e.total) * 100);
 
-            progressText.innerHTML = percentComplete + '%';
-            uploadedSizeText.innerHTML = loadedMB + ' MB';
-            totalSizeText.innerHTML = totalMB + ' MB';
+        const loadedMB =
+            (e.loaded / (1024 * 1024)).toFixed(2);
 
-            if (percentComplete < 100) {
-                timeRemainingText.innerHTML = "Time Remaining: " + formatTime(secondsRemaining);
+        const totalMB =
+            (e.total / (1024 * 1024)).toFixed(2);
+
+        const elapsed =
+            (Date.now() - startTime) / 1000;
+
+        const speed =
+            e.loaded / elapsed;
+
+        const remaining =
+            (e.total - e.loaded) / speed;
+
+        progressText.innerHTML =
+            percentComplete + "%";
+
+        uploadedSizeText.innerHTML =
+            loadedMB + " MB";
+
+        totalSizeText.innerHTML =
+            totalMB + " MB";
+
+        if (percentComplete < 100) {
+
+            if (remaining > 60) {
+                timeRemainingText.innerHTML =
+                    Math.round(remaining / 60) +
+                    " min remaining";
             } else {
-                progressText.innerHTML = 'Saving File...';
-                timeRemainingText.innerHTML = "Upload Complete, Server Processing...";
+                timeRemainingText.innerHTML =
+                    Math.round(remaining) +
+                    " sec remaining";
             }
+
+        } else {
+
+            progressText.innerHTML =
+                "Finalizing...";
+
+            timeRemainingText.innerHTML =
+                "Completing upload...";
         }
     };
 
-    // Helper function to format seconds into MM:SS
-    function formatTime(seconds) {
-        if (!isFinite(seconds) || seconds < 0) return "Calculating...";
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}m ${secs}s`;
-    }
-
-    // Handle Completion
     xhr.onload = function () {
+
         if (xhr.status === 200) {
-            progressText.innerHTML = '100%';
-            timeRemainingText.innerHTML = "Upload Successful! Finalizing...";
 
-            const targetUrl = path ? `/${path}` : `/`;
+            progressText.innerHTML = "100%";
 
-            setTimeout(function () {
-                window.location.href = targetUrl;
+            timeRemainingText.innerHTML =
+                "Upload Complete";
+
+            setTimeout(() => {
+
+                const targetUrl =
+                    path ? `/${path}` : `/`;
+
+                window.location.href =
+                    targetUrl;
+
             }, 500);
+
         } else {
-            alert("Upload Failed. Error Code: " + xhr.status);
-            container.style.display = 'none';
+
+            alert(xhr.responseText);
+
+            container.style.display = "none";
         }
     };
 
     xhr.onerror = function () {
-        alert("An Error Occurred during the Upload.");
-        container.style.display = 'none';
+
+        alert("Upload Failed");
+
+        container.style.display = "none";
     };
-    xhr.open("POST", "/upload", true);
-    xhr.send(formData);
+
+    xhr.open(
+        "POST",
+        "/upload?path=" + encodeURIComponent(path),
+        true
+    );
+
+    xhr.setRequestHeader(
+        "X-Filename",
+        file.name
+    );
+
+    xhr.setRequestHeader(
+        "Content-Type",
+        "application/octet-stream"
+    );
+
+    xhr.send(file);
 }
 
 async function showFileInfo(filePath) {

@@ -64,23 +64,30 @@ def upload():
     subpath = request.form.get("path", "")
     full_Path = safe_Path(subpath)
 
-    if "file" not in request.files:
-        return "No File Part", 400
+    filename = request.headers.get("X-Filename")
 
-    file = request.files["file"]
-    if file.filename == "":
-        return "No File Selected", 400
+    if not filename:
+        return "Missing Filename", 400
 
-    filename = Path(file.filename).name
+    filename = Path(filename).name
     destination = full_Path / filename
 
     if destination.exists():
         return "File Already Exists", 400
 
     try:
-        save_Uploaded_File(file, destination)
+        with open(destination, "wb") as f:
+            while True:
+                chunk = request.stream.read(1024 * 1024)
+
+                if not chunk:
+                    break
+
+                f.write(chunk)
+
         flash(f"Uploaded: {filename}")
         return "OK", 200
+
     except Exception as e:
         return str(e), 500
 
