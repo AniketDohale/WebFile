@@ -67,15 +67,15 @@ def get_Item_Info(full_Path):
     }
 
 
-def save_Uploaded_File(file, destination):
-    with open(destination, "wb") as f:
-        file.stream.seek(0)
+# def save_Uploaded_File(file, destination):
+#     with open(destination, "wb") as f:
+#         file.stream.seek(0)
 
-        while True:
-            chunk = file.stream.read(1024 * 1024)
-            if not chunk:
-                break
-            f.write(chunk)
+#         while True:
+#             chunk = file.stream.read(1024 * 1024)
+#             if not chunk:
+#                 break
+#             f.write(chunk)
 
 
 def get_Total_Size(path):
