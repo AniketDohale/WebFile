@@ -85,126 +85,143 @@ document.addEventListener("click", function (e) {
     }
 });
 
-const uploadBtn = document.getElementById("upload-btn");
+document.addEventListener("DOMContentLoaded", () => {
 
-uploadBtn.addEventListener("click", uploadFile);
+    let currentUploadXHR = null;
 
-function uploadFile() {
+    const uploadBtn = document.getElementById("upload-btn");
+    const cancelUploadBtn = document.getElementById("cancel-upload-btn");
+    uploadBtn.addEventListener("click", uploadFile);
 
-    const fileInput = document.getElementById("file-input");
-    const path = document.getElementById("upload-path").value;
+    cancelUploadBtn.addEventListener(
+        "click",
+        () => {
 
-    if (fileInput.files.length === 0) {
-        alert("Please select a file first.");
-        return;
-    }
-
-    const file = fileInput.files[0];
-
-    const xhr = new XMLHttpRequest();
-
-    const container = document.getElementById("progress-container");
-    const progressText = document.getElementById("progress-text");
-
-    const uploadedSizeText = document.getElementById("uploaded-size");
-    const totalSizeText = document.getElementById("total-size");
-    const timeRemainingText = document.getElementById("time-remaining");
-
-    container.style.display = "block";
-
-    const startTime = Date.now();
-
-    xhr.upload.onprogress = function (e) {
-
-        if (!e.lengthComputable) return;
-
-        const percentComplete =
-            Math.round((e.loaded / e.total) * 100);
-
-        const loadedMB =
-            (e.loaded / (1024 * 1024)).toFixed(2);
-
-        const totalMB =
-            (e.total / (1024 * 1024)).toFixed(2);
-
-        const elapsed =
-            (Date.now() - startTime) / 1000;
-
-        const speed =
-            e.loaded / elapsed;
-
-        const remaining =
-            (e.total - e.loaded) / speed;
-
-        progressText.innerHTML =
-            percentComplete + "%";
-
-        uploadedSizeText.innerHTML =
-            loadedMB + " MB";
-
-        totalSizeText.innerHTML =
-            totalMB + " MB";
-
-        if (percentComplete < 100) {
-
-            if (remaining > 60) {
-                timeRemainingText.innerHTML =
-                    Math.round(remaining / 60) +
-                    " min remaining";
-            } else {
-                timeRemainingText.innerHTML =
-                    Math.round(remaining) +
-                    " sec remaining";
+            if (currentUploadXHR) {
+                currentUploadXHR.abort();
             }
 
-        } else {
-
-            progressText.innerHTML =
-                "Finalizing...";
-
-            timeRemainingText.innerHTML =
-                "Completing upload...";
         }
-    };
+    );
 
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            progressText.innerHTML = "100%";
-
-            timeRemainingText.innerHTML =
-                "Upload Complete";
-            setTimeout(() => {
-                const targetUrl =
-                    path ? `/${path}` : `/`;
-
-                window.location.href =
-                    targetUrl;
-            }, 500);
-
-        } else {
-            alert(xhr.responseText);
-            container.style.display = "none";
-        }
-    };
-    xhr.onerror = function () {
-        alert("Upload Failed");
+    function resetUploadUI(container) {
+        uploadBtn.disabled = false;
+        cancelUploadBtn.style.display = "none";
         container.style.display = "none";
-    };
-    xhr.open(
-        "POST",
-        "/upload?path=" + encodeURIComponent(path),
-        true
-    );
-    xhr.setRequestHeader(
-        "X-Filename",
-        file.name
-    );
-    xhr.setRequestHeader(
-        "Content-Type",
-        "application/octet-stream"
-    );
-    xhr.send(file);
-}
+        currentUploadXHR = null;
+    }
+
+    function uploadFile() {
+        const fileInput = document.getElementById("file-input");
+        const path = document.getElementById("upload-path").value;
+        if (fileInput.files.length === 0) {
+            alert("Please Select a File First.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const xhr = new XMLHttpRequest();
+        currentUploadXHR = xhr;
+        const container = document.getElementById("progress-container");
+        const progressText = document.getElementById("progress-text");
+        const uploadedSizeText = document.getElementById("uploaded-size");
+        const totalSizeText = document.getElementById("total-size");
+        const timeRemainingText = document.getElementById("time-remaining");
+
+        container.style.display = "block";
+        uploadBtn.disabled = true;
+        cancelUploadBtn.style.display = "flex";
+        const startTime = Date.now();
+
+        xhr.upload.onprogress = function (e) {
+
+            if (!e.lengthComputable) return;
+
+            const percentComplete =
+                Math.round((e.loaded / e.total) * 100);
+            const loadedMB =
+                (e.loaded / (1024 * 1024)).toFixed(2);
+            const totalMB =
+                (e.total / (1024 * 1024)).toFixed(2);
+            const elapsed =
+                (Date.now() - startTime) / 1000;
+            const speed =
+                e.loaded / elapsed;
+            const remaining =
+                (e.total - e.loaded) / speed;
+            progressText.innerHTML =
+                percentComplete + "%";
+            uploadedSizeText.innerHTML =
+                loadedMB + " MB";
+            totalSizeText.innerHTML =
+                totalMB + " MB";
+            if (percentComplete < 100) {
+                if (remaining > 60) {
+                    timeRemainingText.innerHTML =
+                        Math.round(remaining / 60) +
+                        " min remaining";
+                } else {
+                    timeRemainingText.innerHTML =
+                        Math.round(remaining) +
+                        " sec remaining";
+                }
+            } else {
+                progressText.innerHTML =
+                    "Finalizing...";
+                timeRemainingText.innerHTML =
+                    "Completing upload...";
+            }
+        };
+
+        xhr.onload = function () {
+            uploadBtn.disabled = false;
+            if (xhr.status === 200) {
+                document.getElementById("cancel-upload-btn").style.display = "none";
+                progressText.innerHTML = "100%";
+
+                timeRemainingText.innerHTML =
+                    "Upload Complete";
+                setTimeout(() => {
+                    const targetUrl =
+                        path ? `/${path}` : `/`;
+                    window.location.href =
+                        targetUrl;
+                }, 500);
+            } else {
+                alert(xhr.responseText);
+                container.style.display = "none";
+            }
+        };
+
+        xhr.onabort = function () {
+            alert("Upload Cancelled");
+            resetUploadUI(container);
+        };
+
+        xhr.onerror = function () {
+            alert("Upload Failed");
+            resetUploadUI(container);
+        };
+
+        xhr.open(
+            "POST",
+            "/upload?path=" + encodeURIComponent(path),
+            true
+        );
+
+        xhr.setRequestHeader(
+            "X-Filename",
+            file.name
+        );
+
+        xhr.setRequestHeader(
+            "Content-Type",
+            "application/octet-stream"
+        );
+
+        xhr.send(file);
+    }
+});
 
 async function showFileInfo(filePath) {
     const modal = document.getElementById('infoModal');
@@ -250,10 +267,26 @@ window.onclick = function (event) {
     }
 }
 
+let currentUploadXHR = null;
 const pasteForm = document.getElementById("paste-form");
+
 if (pasteForm) {
+
+    let currentPasteTaskId = null;
+    let pasteInterval = null;
+
+    const progressBox =
+        document.getElementById("paste-progress");
+
+    const progressText =
+        document.getElementById("paste-progress-text");
+
+    const cancelPasteBtn =
+        document.getElementById("cancel-paste-btn");
+
     pasteForm.addEventListener("submit", async function (e) {
         e.preventDefault();
+
         const formData = new FormData(pasteForm);
         const response = await fetch("/paste", {
             method: "POST",
@@ -262,36 +295,65 @@ if (pasteForm) {
 
         const data = await response.json();
         const taskId = data.task_id;
-        const progressBox = document.getElementById("paste-progress");
-        const progressText = document.getElementById("paste-progress-text");
+        currentPasteTaskId = taskId;
 
         progressBox.style.display = "block";
+        cancelPasteBtn.style.display = "flex";
 
-        const interval = setInterval(async () => {
+        pasteInterval = setInterval(async () => {
+
             const res = await fetch(`/progress/${taskId}`);
             const progressData = await res.json();
+
             progressText.innerText =
                 `${progressData.progress || 0}%`;
 
-            if (
-                progressData.status === "completed"
-            ) {
-                clearInterval(interval);
+            if (progressData.status === "completed") {
+                clearInterval(pasteInterval);
+                pasteInterval = null;
+
                 progressText.innerText = "Completed";
+                cancelPasteBtn.style.display = "none";
+
                 location.reload();
             }
 
-            if (
-                progressData.status === "error"
-            ) {
-                clearInterval(interval);
-                progressText.innerText =
-                    "Error";
+            if (progressData.status === "error") {
+                clearInterval(pasteInterval);
+                pasteInterval = null;
+
+                progressText.innerText = "Error";
+                cancelPasteBtn.style.display = "none";
             }
+
+            if (progressData.status === "cancelled") {
+                clearInterval(pasteInterval);
+                pasteInterval = null;
+
+                progressText.innerText = "Cancelled";
+                cancelPasteBtn.style.display = "none";
+            }
+
         }, 500);
     });
-}
 
+    cancelPasteBtn.addEventListener("click", async () => {
+
+        if (!currentPasteTaskId) return;
+
+        await fetch(`/cancel-task/${currentPasteTaskId}`, {
+            method: "POST"
+        });
+
+        if (pasteInterval) {
+            clearInterval(pasteInterval);
+            pasteInterval = null;
+        }
+
+        progressText.innerText = "Cancelled";
+        cancelPasteBtn.style.display = "none";
+    });
+}
 
 // List and Grid Toggle
 const fileList = document.getElementById("file-list");
@@ -304,7 +366,7 @@ function applyLayout() {
 
     if (savedLayout === "grid") {
         fileList.classList.add("grid-view");
-        htmlEl.classList.add("grid-layout-active"); // Keep sync
+        htmlEl.classList.add("grid-layout-active");
         layoutIcon.src = "/static/icons/list.png";
     } else {
         fileList.classList.remove("grid-view");
@@ -321,10 +383,10 @@ layoutToggle.addEventListener("click", () => {
     const isCurrentlyGrid = fileList.classList.contains("grid-view");
     if (isCurrentlyGrid) {
         localStorage.setItem("layout", "list");
-        document.documentElement.classList.remove("grid-layout-active"); // Add this
+        document.documentElement.classList.remove("grid-layout-active");
     } else {
         localStorage.setItem("layout", "grid");
-        document.documentElement.classList.add("grid-layout-active"); // Add this
+        document.documentElement.classList.add("grid-layout-active");
     }
     applyLayout();
 });
@@ -340,5 +402,13 @@ document.addEventListener("click", function (e) {
     const row = e.target.closest(".file-row");
     if (row && row.dataset.href) {
         window.location.href = row.dataset.href;
+    }
+});
+
+const cancelUploadBtn = document.getElementById("cancel-upload-btn");
+
+cancelUploadBtn.addEventListener("click", () => {
+    if (currentUploadXHR) {
+        currentUploadXHR.abort();
     }
 });

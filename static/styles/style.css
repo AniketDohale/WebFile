@@ -66,6 +66,14 @@ h2 {
     font-weight: normal;
 }
 
+.upload-tools {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-cancel,
 .btn-upload,
 .icon-creation-btn {
     -webkit-tap-highlight-color: transparent;
@@ -84,12 +92,14 @@ h2 {
     border: 1px solid black;
 }
 
+.btn-cancel:hover,
 .btn-upload:hover,
 .icon-creation-btn:hover {
     background-color: #d2e3fc;
     opacity: 1;
 }
 
+.btn-cancel img,
 .btn-upload img {
     height: 20px;
     width: 20px;

@@ -39,10 +39,16 @@
                 <input type="hidden" id="upload-path" value="{{ current_path }}">
 
                 <input type="file" id="file-input" required>
+                
+                <div class="upload-tools">
+                    <button type="button" class="btn-cancel" id="cancel-upload-btn" style="display: none">
+                        <img src="/static/icons/cancel.png" alt="Cancel">
+                    </button>
 
-                <button type="button" class="btn-upload" id="upload-btn" title="Upload">
-                    <img src="/static/icons/upload.png" alt="Upload">
-                </button>
+                    <button type="button" class="btn-upload" id="upload-btn" title="Upload">
+                        <img src="/static/icons/upload.png" alt="Upload">
+                    </button>
+                </div>
             </div>
 
             <div id="progress-container" style="display:none;">
@@ -59,6 +65,10 @@
             <div id="paste-progress" style="display:none;">
                 <div id="paste-progress-text">0%</div>
             </div>
+            <button id="cancel-paste-btn" class="icon-creation-btn" style="display:none;">
+                <img src="/static/icons/cancel.png" alt="Cancel">
+            </button>
+            
             <!-- Create Paste Form -->
             {% if session.get('clipboard') %}
             <form id="paste-form">

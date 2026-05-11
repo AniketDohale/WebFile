@@ -1,10 +1,10 @@
-import os, datetime
+import os, datetime, shutil
 from pathlib import Path
 from flask import abort
 from paths import BASE_DIR
 
 TASK_PROGRESS = {}
-
+CANCEL_TASKS = set()
 
 def safe_Path(subpath):
     if not subpath:
@@ -67,17 +67,6 @@ def get_Item_Info(full_Path):
     }
 
 
-# def save_Uploaded_File(file, destination):
-#     with open(destination, "wb") as f:
-#         file.stream.seek(0)
-
-#         while True:
-#             chunk = file.stream.read(1024 * 1024)
-#             if not chunk:
-#                 break
-#             f.write(chunk)
-
-
 def get_Total_Size(path):
     if path.is_file():
         return path.stat().st_size
@@ -104,6 +93,25 @@ def copy_With_Progress(src, dst, task_id):
         with open(source, "rb") as fsrc:
             with open(destination, "wb") as fdst:
                 while True:
+                    if task_id in CANCEL_TASKS:
+                        TASK_PROGRESS[task_id] = {
+                            "status": "cancelled",
+                            "progress": TASK_PROGRESS[task_id].get("progress", 0)
+                        }
+
+                        try:
+                            fdst.close()
+                        except:
+                            pass
+
+                        try:
+                            if destination.exists():
+                                destination.unlink()
+                        except:
+                            pass
+
+                        return
+                    
                     chunk = fsrc.read(1024 * 1024)
 
                     if not chunk:
@@ -119,14 +127,40 @@ def copy_With_Progress(src, dst, task_id):
             copy_file(src, dst)
         else:
             for root, dirs, files in os.walk(src):
+                if task_id in CANCEL_TASKS:
+                    TASK_PROGRESS[task_id] = {
+                        "status": "cancelled",
+                        "progress": TASK_PROGRESS[task_id].get("progress", 0)
+                    }
+                    try:
+                        if dst.exists():
+                            shutil.rmtree(dst)
+                    except:
+                        pass
+
+                    return
                 relative = Path(root).relative_to(src)
                 target_root = dst / relative
                 target_root.mkdir(parents=True, exist_ok=True)
                 for file in files:
 
+                    if task_id in CANCEL_TASKS:
+                        TASK_PROGRESS[task_id] = {
+                            "status": "cancelled",
+                            "progress": TASK_PROGRESS[task_id].get("progress", 0)
+                        }
+                        try:
+                            if dst.exists():
+                                shutil.rmtree(dst)
+                        except:
+                            pass
+                        return
+
                     source_file = Path(root) / file
                     target_file = target_root / file
+
                     copy_file(source_file, target_file)
+
         TASK_PROGRESS[task_id]["progress"] = 100
         TASK_PROGRESS[task_id]["status"] = "completed"
 

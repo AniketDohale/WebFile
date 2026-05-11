@@ -17,6 +17,7 @@ from utils import (
     get_Item_Info,
     copy_With_Progress,
     TASK_PROGRESS,
+    CANCEL_TASKS
 )
 
 app = Flask(__name__)
@@ -93,12 +94,14 @@ def upload():
         return "OK", 200
 
     except Exception as e:
-        try:
-            if temp_destination.exists():
-                temp_destination.unlink()
-        except Exception:
-            pass
         return str(e), 500
+    
+    finally:
+         if temp_destination.exists() and not final_destination.exists():
+            try:
+                temp_destination.unlink()
+            except Exception:
+                pass
 
 
 @app.route("/download/<path:filepath>")
@@ -274,16 +277,18 @@ def paste():
     def task():
         try:
             copy_With_Progress(full_Source, destination, task_id)
-            if mode == "cut":
+            result = TASK_PROGRESS.get(task_id, {}).get("status")
+
+            if mode == "cut" and result == "completed" and task_id not in CANCEL_TASKS:
                 if full_Source.is_dir():
                     shutil.rmtree(full_Source)
                 else:
                     full_Source.unlink()
+
         except Exception as e:
             TASK_PROGRESS[task_id] = {"status": "error", "error": str(e)}
     threading.Thread(target=task).start()
 
-    # CLEAR SESSION HERE
     if mode == "cut":
         session.pop("clipboard", None)
         session.pop("clipboard_mode", None)
@@ -294,6 +299,16 @@ def paste():
 def progress(task_id):
     return TASK_PROGRESS.get(task_id, {"status": "not_found"})
 
+
+@app.route("/cancel-task/<task_id>", methods=["POST"])
+def cancel_task(task_id):
+    CANCEL_TASKS.add(task_id)
+
+    TASK_PROGRESS[task_id] = {
+        "status": "cancelled",
+        "progress": TASK_PROGRESS.get(task_id, {}).get("progress", 0)
+    }
+    return {"ok": True}
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=4000, debug=True)
