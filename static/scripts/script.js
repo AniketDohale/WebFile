@@ -334,8 +334,22 @@ document.addEventListener("click", function (e) {
     if (e.target.closest(".menu")) {
         return;
     }
+    if (e.target.closest("a")) {
+        return;
+    }
     const row = e.target.closest(".file-row");
-    if (row && row.dataset.href) {
+    if (!row || !row.dataset.href) {
+        return;
+    }
+    // Check if Row is Folder
+    const isFolder =
+        row.dataset.href.startsWith("/") &&
+        !row.dataset.href.startsWith("/view/");
+    if (isFolder) {
+        // Open Folder in same tab
+        window.location.href = row.dataset.href;
+    } else {
+        // Open file in new tab
         window.open(row.dataset.href, "_blank");
     }
 });
