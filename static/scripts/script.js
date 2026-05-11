@@ -168,55 +168,41 @@ function uploadFile() {
     };
 
     xhr.onload = function () {
-
         if (xhr.status === 200) {
-
             progressText.innerHTML = "100%";
 
             timeRemainingText.innerHTML =
                 "Upload Complete";
-
             setTimeout(() => {
-
                 const targetUrl =
                     path ? `/${path}` : `/`;
 
                 window.location.href =
                     targetUrl;
-
             }, 500);
 
         } else {
-
             alert(xhr.responseText);
-
             container.style.display = "none";
         }
     };
-
     xhr.onerror = function () {
-
         alert("Upload Failed");
-
         container.style.display = "none";
     };
-
     xhr.open(
         "POST",
         "/upload?path=" + encodeURIComponent(path),
         true
     );
-
     xhr.setRequestHeader(
         "X-Filename",
         file.name
     );
-
     xhr.setRequestHeader(
         "Content-Type",
         "application/octet-stream"
     );
-
     xhr.send(file);
 }
 
@@ -350,6 +336,6 @@ document.addEventListener("click", function (e) {
     }
     const row = e.target.closest(".file-row");
     if (row && row.dataset.href) {
-        window.location.href = row.dataset.href;
+        window.open(row.dataset.href, "_blank");
     }
 });

@@ -63,17 +63,14 @@ def browse(subpath=""):
 
 @app.route("/upload", methods=["POST"])
 def upload():
-
     subpath = request.args.get("path", "")
     full_Path = safe_Path(subpath)
-
     filename = request.headers.get("X-Filename")
 
     if not filename:
         return "Missing filename", 400
 
     filename = Path(filename).name
-
     final_destination = full_Path / filename
 
     if final_destination.exists():
@@ -82,11 +79,8 @@ def upload():
     temp_destination = full_Path / (filename + ".part")
 
     try:
-
         with open(temp_destination, "wb") as f:
-
             while True:
-
                 chunk = request.stream.read(1024 * 1024)
 
                 if not chunk:
@@ -95,19 +89,15 @@ def upload():
                 f.write(chunk)
 
         temp_destination.rename(final_destination)
-
         flash(f"Uploaded: {filename}")
-
         return "OK", 200
 
     except Exception as e:
-
         try:
             if temp_destination.exists():
                 temp_destination.unlink()
         except Exception:
             pass
-
         return str(e), 500
 
 
