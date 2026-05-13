@@ -45,9 +45,6 @@ def browse(subpath=""):
         if not show_Hidden and item.name.startswith("."):
             continue
 
-        if item.name.endswith(".part"):
-            continue
-
         try:
             items.append({"name": item.name, "is_dir": item.is_dir()})
         except Exception:
