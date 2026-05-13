@@ -1,10 +1,14 @@
-import os, datetime, shutil
+import os, datetime, shutil, subprocess, json
 from pathlib import Path
 from flask import abort
 from paths import BASE_DIR
 
 TASK_PROGRESS = {}
 CANCEL_TASKS = set()
+VIDEO_EXTENSIONS = {
+    ".mp4", ".mkv", ".mov", ".avi", ".m4v", ".webm"
+}
+
 
 def safe_Path(subpath):
     if not subpath:
@@ -53,7 +57,7 @@ def get_Item_Info(full_Path):
         raw_size = stats.st_size
         item_type = "File"
 
-    return {
+    info = {
         "name": full_Path.name,
         "size": format_Size(raw_size),
         "created": datetime.datetime.fromtimestamp(stats.st_ctime).strftime(
@@ -65,6 +69,45 @@ def get_Item_Info(full_Path):
         "type": item_type,
         "extension": full_Path.suffix if full_Path.is_file() else "N/A",
     }
+    if (
+        full_Path.is_file()
+        and full_Path.suffix.lower() in VIDEO_EXTENSIONS
+    ):
+        try:
+            result = subprocess.run(
+                [
+                    "ffprobe",
+                    "-v", "quiet",
+                    "-print_format", "json",
+                    "-show_streams",
+                    str(full_Path)
+                ],
+                capture_output=True,
+                text=True
+            )
+            data = json.loads(result.stdout)
+            for stream in data.get("streams", []):
+                if stream.get("codec_type") == "video":
+                    width = stream.get("width")
+                    height = stream.get("height")
+
+                    if width and height:
+                        info["resolution"] = f"{width}x{height}"
+
+                    fps_raw = stream.get("r_frame_rate", "0/1")
+
+                    try:
+                        num, den = map(int, fps_raw.split("/"))
+                        if den != 0:
+                            fps = round(num / den, 2)
+                            info["fps"] = f"{fps} FPS"
+                    except Exception:
+                        pass
+
+                    break
+        except Exception:
+            pass
+    return info
 
 
 def get_Total_Size(path):

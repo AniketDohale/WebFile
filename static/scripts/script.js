@@ -239,6 +239,8 @@ async function showFileInfo(filePath) {
         document.getElementById('info-created').textContent = data.created;
         document.getElementById('info-modified').textContent = data.modified;
         document.getElementById('info-extension').textContent = data.extension;
+        document.getElementById('info-resolution').textContent = data.resolution || "-";
+        document.getElementById('info-fps').textContent = data.fps || "-";
 
         // Show the modal
         modal.style.display = 'flex';
