@@ -210,3 +210,21 @@ def copy_With_Progress(src, dst, task_id):
     except Exception as e:
         TASK_PROGRESS[task_id]["status"] = "error"
         TASK_PROGRESS[task_id]["error"] = str(e)
+
+
+def get_Service_Info(name):
+    def run(cmd):
+        return subprocess.run(cmd, capture_output=True, text=True).stdout.strip()
+
+    active_State = run(["systemctl", "is-active", name])
+    enabled_State = run(["systemctl", "is-enabled", name])
+    desc = run(["systemctl", "show", name, "-p", "Description"]).replace("Description=", "")
+    pid = run(["systemctl", "show", name, "-p", "MainPID"]).replace("MainPID=", "")
+
+    return {
+        "name": name,
+        "active": active_State,
+        "enabled": enabled_State,
+        "description": desc,
+        "pid": pid if pid != "0" else "-"
+    }

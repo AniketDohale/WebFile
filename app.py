@@ -1,4 +1,4 @@
-import shutil, threading, uuid
+import shutil, threading, uuid, subprocess
 from flask import (
     Flask,
     render_template,
@@ -17,12 +17,20 @@ from utils import (
     get_Item_Info,
     copy_With_Progress,
     TASK_PROGRESS,
-    CANCEL_TASKS
+    CANCEL_TASKS,
+    get_Service_Info
 )
 
 app = Flask(__name__)
 
 app.secret_key = "super_secret_key_for_session"
+
+SERVICES = [
+    "minidlna",
+    "transmission-daemon",
+    "tailscale",
+    "dufs"
+]
 
 
 @app.route("/")
@@ -307,5 +315,40 @@ def cancel_task(task_id):
     }
     return {"ok": True}
 
+
+@app.route("/services")
+def services():
+    active = []
+    inactive = []
+
+    for s in SERVICES:
+        info = get_Service_Info(s)
+
+        if info["active"] == "active":
+            active.append(info)
+        else:
+            inactive.append(info)
+
+    return render_template(
+        "services.html",
+        active_services=active,
+        inactive_services=inactive
+    )
+
+@app.route("/service/<name>/<action>", methods=["POST"])
+def service_Action(name, action):
+
+    allowed = ["start", "stop", "enable", "disable"]
+
+    if name not in SERVICES:
+        return "Not Allowed", 403
+
+    if action not in allowed:
+        return "Invalid Action", 400
+
+    subprocess.run(["sudo", "systemctl", action, name])
+
+    return redirect("/services")
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=4000, debug=False)
+    app.run(host="0.0.0.0", port=4000, debug=True)
