@@ -219,12 +219,12 @@ def get_Service_Info(name):
     active_State = run(["systemctl", "is-active", name])
     enabled_State = run(["systemctl", "is-enabled", name])
     desc = run(["systemctl", "show", name, "-p", "Description"]).replace("Description=", "")
-    pid = run(["systemctl", "show", name, "-p", "MainPID"]).replace("MainPID=", "")
+    pid = run(["systemctl", "show", name, "-p", "MainPID"]).split("=")[-1].strip()
 
     return {
         "name": name,
         "active": active_State,
         "enabled": enabled_State,
         "description": desc,
-        "pid": pid if pid != "0" else "-"
+        "pid": pid if pid != "0" else "N/A"
     }
