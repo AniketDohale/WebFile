@@ -6,84 +6,87 @@
 </head>
 
 <body>
-    <h2>WebFile</h2>
+    <div class="container">
+        <h2>WebFile</h2>
 
-    <div class="top-nav">
-        <a href="/">Files</a>
-        <a href="/services" class="active">Services</a>
-    </div>
+        <div class="top-nav">
+            <a href="/">Files</a>
+            <a href="/services" class="active">Services</a>
+        </div>
 
-    <div class="file-list">
+        <div class="file-list">
 
-        <h3 class="service-title">Active Services</h3>
+            <h3 class="service-title">Active Services</h3>
 
-        {% for s in active_services %}
-        <div class="file-row">
-            <div class="file-name">
-                📦 <span>{{ s.name }}</span>
-                <small>{{ s.description }}</small>
-                <small>PID: {{ s.pid }} | Status: {{ s.active }}</small>
-            </div>
+            {% for s in active_services %}
+            <div class="file-row">
+                <div class="file-name">
+                    📦 <span>{{ s.name }}</span>
+                    <small>{{ s.description }}</small>
+                    <small>PID: {{ s.pid }} | Status: {{ s.active }}</small>
+                </div>
 
-            <div class="menu">
-                <button class="menu-btn">
-                    <img src="/static/icons/menu.png">
-                </button>
+                <div class="menu">
+                    <button class="menu-btn">
+                        <img src="/static/icons/menu.png">
+                    </button>
 
-                <div class="menu-dropdown">
+                    <div class="menu-dropdown">
 
-                    <form method="post" action="/service/{{ s.name }}/stop">
-                        <button class="icon-btn">Stop</button>
-                    </form>
+                        <form method="post" action="/service/{{ s.name }}/stop">
+                            <button class="icon-btn">Stop</button>
+                        </form>
 
-                    <form method="post" action="/service/{{ s.name }}/enable">
-                        <button class="icon-btn">Enable</button>
-                    </form>
+                        <form method="post" action="/service/{{ s.name }}/enable">
+                            <button class="icon-btn">Enable</button>
+                        </form>
 
-                    <form method="post" action="/service/{{ s.name }}/disable">
-                        <button class="icon-btn">Disable</button>
-                    </form>
+                        <form method="post" action="/service/{{ s.name }}/disable">
+                            <button class="icon-btn">Disable</button>
+                        </form>
 
+                    </div>
                 </div>
             </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
 
 
-        <h3 class="service-title">Inactive Services</h3>
+            <h3 class="service-title">Inactive Services</h3>
 
-        {% for s in inactive_services %}
-        <div class="file-row">
-            <div class="file-name">
-                📦 <span>{{ s.name }}</span>
-                <small>{{ s.description }}</small>
-                <small>PID: {{ s.pid }} | Status: {{ s.active }}</small>
-            </div>
+            {% for s in inactive_services %}
+            <div class="file-row">
+                <div class="file-name">
+                    📦 <span>{{ s.name }}</span>
+                    <small>{{ s.description }}</small>
+                    <small>PID: {{ s.pid }} | Status: {{ s.active }}</small>
+                </div>
 
-            <div class="menu">
-                <button class="menu-btn">
-                    <img src="/static/icons/menu.png">
-                </button>
+                <div class="menu">
+                    <button class="menu-btn">
+                        <img src="/static/icons/menu.png">
+                    </button>
 
-                <div class="menu-dropdown">
+                    <div class="menu-dropdown">
 
-                    <form method="post" action="/service/{{ s.name }}/start">
-                        <button class="icon-btn">Start</button>
-                    </form>
+                        <form method="post" action="/service/{{ s.name }}/start">
+                            <button class="icon-btn">Start</button>
+                        </form>
 
-                    <form method="post" action="/service/{{ s.name }}/enable">
-                        <button class="icon-btn">Enable</button>
-                    </form>
+                        <form method="post" action="/service/{{ s.name }}/enable">
+                            <button class="icon-btn">Enable</button>
+                        </form>
 
-                    <form method="post" action="/service/{{ s.name }}/disable">
-                        <button class="icon-btn">Disable</button>
-                    </form>
+                        <form method="post" action="/service/{{ s.name }}/disable">
+                            <button class="icon-btn">Disable</button>
+                        </form>
 
+                    </div>
                 </div>
             </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
 
+        </div>
     </div>
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </body>
 </html>
