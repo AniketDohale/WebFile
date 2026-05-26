@@ -3,6 +3,8 @@ from pathlib import Path
 
 SYSTEM = platform.system()
 
+SERVICES_FILE = Path("services.json")
+
 if SYSTEM == "Windows":
     BASE_DIR = Path(r"D:\Media").resolve()
 

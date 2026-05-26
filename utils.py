@@ -1,7 +1,7 @@
 import os, datetime, shutil, subprocess, json
 from pathlib import Path
 from flask import abort
-from paths import BASE_DIR
+from paths import BASE_DIR, SERVICES_FILE
 
 TASK_PROGRESS = {}
 CANCEL_TASKS = set()
@@ -210,6 +210,13 @@ def copy_With_Progress(src, dst, task_id):
     except Exception as e:
         TASK_PROGRESS[task_id]["status"] = "error"
         TASK_PROGRESS[task_id]["error"] = str(e)
+
+
+def load_Services():
+    if SERVICES_FILE.exists():
+        with open(SERVICES_FILE, "r") as f:
+            return json.load(f)
+    return []
 
 
 def get_Service_Info(name):

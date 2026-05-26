@@ -79,6 +79,7 @@
 
 /* Buttons */
 .btn {
+    -webkit-tap-highlight-color: transparent;
     padding: 6px 10px;
     font-size: 12px;
     border-radius: 6px;

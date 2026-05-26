@@ -16,6 +16,12 @@
             <a href="/services" class="active">Services</a>
         </div>
 
+        {% if error %}
+            <div style="color: red; font-weight: bold;">
+                {{ error }}
+            </div>
+        {% endif %}
+
         <!-- ACTIVE SERVICES -->
         <section class="service-section">
             <h3 class="section-title">Active Services</h3>

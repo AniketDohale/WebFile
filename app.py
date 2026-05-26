@@ -1,4 +1,4 @@
-import shutil, threading, uuid, subprocess
+import shutil, threading, uuid, subprocess, platform
 from flask import (
     Flask,
     render_template,
@@ -7,9 +7,8 @@ from flask import (
     send_from_directory,
     abort,
     flash,
-    session,
+    session
 )
-
 from pathlib import Path
 from paths import BASE_DIR
 from utils import (
@@ -18,21 +17,17 @@ from utils import (
     copy_With_Progress,
     TASK_PROGRESS,
     CANCEL_TASKS,
-    get_Service_Info
+    get_Service_Info,
+    load_Services
 )
 
 app = Flask(__name__)
 
 app.secret_key = "super_secret_key_for_session"
 
-SERVICES = [
-    "minidlna",
-    "transmission-daemon",
-    "tailscaled",
-    "dufs", 
-    "ProfileHub"
-]
+SYSTEM = platform.system()
 
+SERVICES = load_Services()
 
 @app.route("/")
 @app.route("/<path:subpath>")
@@ -319,6 +314,13 @@ def cancel_task(task_id):
 
 @app.route("/services")
 def services():
+
+    if SYSTEM == "Windows":
+        return render_template(
+            "services.html",
+            error="Service Management is not Supported on Windows."
+        )
+    
     active = []
     inactive = []
 

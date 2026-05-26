@@ -35,6 +35,7 @@ h2 {
 }
 
 .top-nav a {
+    -webkit-tap-highlight-color: transparent;
     padding: 8px 14px;
     text-decoration: none;
     border-radius: 8px;
