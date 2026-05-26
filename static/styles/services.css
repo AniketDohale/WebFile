@@ -23,13 +23,13 @@
     gap: 10px;
 }
 
-/* Active / inactive accent */
+/* Active / Inactive */
 .service-card.active {
-    border-left: 4px solid #2ecc71;
+    border: 1px solid #2ecc71;
 }
 
 .service-card.inactive {
-    border-left: 4px solid #e67e22;
+    border: 1px solid #e67e22;
 }
 
 /* Text */
@@ -40,13 +40,13 @@
 }
 
 .service-desc {
-    font-size: 12px;
+    font-size: 14px;
     color: #666;
     margin-bottom: 8px;
 }
 
 .service-meta {
-    font-size: 11px;
+    font-size: 12px;
     color: #555;
     display: flex;
     gap: 10px;
@@ -76,8 +76,8 @@
 }
 
 .btn.primary {
-    border-color: #1a73e8;
-    color: #1a73e8;
+    border-color: #2ecc71;
+    color: #2ecc71;
 }
 
 .btn.danger {
@@ -85,7 +85,7 @@
     color: #e74c3c;
 }
 
-/* Empty state */
+/* Empty State */
 .empty {
     margin: 10px;
     color: #888;
