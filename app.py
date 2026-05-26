@@ -28,8 +28,9 @@ app.secret_key = "super_secret_key_for_session"
 SERVICES = [
     "minidlna",
     "transmission-daemon",
-    "tailscale",
-    "dufs"
+    "tailscaled",
+    "dufs", 
+    "ProfileHub"
 ]
 
 

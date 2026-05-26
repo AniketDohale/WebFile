@@ -3,68 +3,70 @@
 <head>
     <title>Services</title>
     <link rel="stylesheet" href="/static/styles/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/services.css') }}">
 </head>
 
 <body>
+    <h2>WebFile</h2>
 
-<h2>Active Services</h2>
+    <h2>Active Services</h2>
 
-{% for s in active_services %}
-<div class="file-row">
-    <div>
-        <b>{{ s.name }}</b><br>
-        {{ s.description }}<br>
-        PID: {{ s.pid }}<br>
-        Status: {{ s.active }}
+    {% for s in active_services %}
+    <div class="file-row">
+        <div>
+            <b>{{ s.name }}</b><br>
+            {{ s.description }}<br>
+            PID: {{ s.pid }}<br>
+            Status: {{ s.active }}
+        </div>
+
+        <div class="menu">
+
+            <form method="post" action="/service/{{ s.name }}/stop">
+                <button>Stop</button>
+            </form>
+
+            <form method="post" action="/service/{{ s.name }}/enable">
+                <button>Enable</button>
+            </form>
+
+            <form method="post" action="/service/{{ s.name }}/disable">
+                <button>Disable</button>
+            </form>
+
+        </div>
     </div>
+    {% endfor %}
 
-    <div class="menu">
 
-        <form method="post" action="/service/{{ s.name }}/stop">
-            <button>Stop</button>
-        </form>
+    <h2>Downloaded Services</h2>
 
-        <form method="post" action="/service/{{ s.name }}/enable">
-            <button>Enable</button>
-        </form>
+    {% for s in inactive_services %}
+    <div class="file-row">
+        <div>
+            <b>{{ s.name }}</b><br>
+            {{ s.description }}<br>
+            PID: {{ s.pid }}<br>
+            Status: {{ s.active }}
+        </div>
 
-        <form method="post" action="/service/{{ s.name }}/disable">
-            <button>Disable</button>
-        </form>
+        <div class="menu">
 
+            <form method="post" action="/service/{{ s.name }}/start">
+                <button>Start</button>
+            </form>
+
+            <form method="post" action="/service/{{ s.name }}/enable">
+                <button>Enable</button>
+            </form>
+
+            <form method="post" action="/service/{{ s.name }}/disable">
+                <button>Disable</button>
+            </form>
+
+        </div>
     </div>
-</div>
-{% endfor %}
+    {% endfor %}
 
-
-<h2>Downloaded Services</h2>
-
-{% for s in inactive_services %}
-<div class="file-row">
-    <div>
-        <b>{{ s.name }}</b><br>
-        {{ s.description }}<br>
-        PID: {{ s.pid }}<br>
-        Status: {{ s.active }}
-    </div>
-
-    <div class="menu">
-
-        <form method="post" action="/service/{{ s.name }}/start">
-            <button>Start</button>
-        </form>
-
-        <form method="post" action="/service/{{ s.name }}/enable">
-            <button>Enable</button>
-        </form>
-
-        <form method="post" action="/service/{{ s.name }}/disable">
-            <button>Disable</button>
-        </form>
-
-    </div>
-</div>
-{% endfor %}
-
-</body>
+    </body>
 </html>
