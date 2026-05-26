@@ -352,4 +352,4 @@ def service_Action(name, action):
     return redirect("/services")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=4000, debug=True)
+    app.run(host="0.0.0.0", port=4000, debug=False)
