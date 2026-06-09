@@ -4,6 +4,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebFile</title>
 
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
+
     <script>
         // Use a blocking script to check storage immediately
         (function() {
@@ -178,7 +182,7 @@
                         <form action="/rename" class="icon-form" method="post" id="rename-form-{{ loop.index }}">
                             <input type="hidden" name="old_path" value="{{ (current_path ~ '/' ~ item.name).strip('/') }}">
                             <input type="hidden" name="new_name" id="new-name-{{ loop.index }}" required>
-                            <button type="button" class="icon-btn btn-rename" onclick="triggerRename('{{ item.name }}', '{{ loop.index }}')">
+                            <button type="button" class="icon-btn btn-rename" onclick='triggerRename({{ item.name|tojson }}, {{ loop.index }})'>
                                 Rename
                             </button>
                         </form>
@@ -204,7 +208,7 @@
                             </button>
                         </form>
 
-                        <button class="icon-btn btn-info" onclick="showFileInfo('{{ (current_path ~ '/' ~ item.name).strip('/') }}')">
+                        <button class="icon-btn btn-info" onclick='showFileInfo({{ ((current_path ~ "/" ~ item.name).strip("/"))|tojson }})'>
                             Information
                         </button>
 

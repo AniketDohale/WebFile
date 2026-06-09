@@ -227,7 +227,7 @@ async function showFileInfo(filePath) {
     const modal = document.getElementById('infoModal');
 
     try {
-        const response = await fetch(`/info/${filePath}`);
+        const response = await fetch(`/info/${encodeURI(filePath)}`);
         if (!response.ok) throw new Error("Could Not Fetch File Info");
 
         const data = await response.json();
