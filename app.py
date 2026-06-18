@@ -37,6 +37,10 @@ def browse(subpath=""):
     if not full_Path.exists():
         flash("Folder Not Found")
         return redirect("/")
+    
+    if not full_Path.is_dir():
+        flash("Not a Folder")
+        return redirect("/")
 
     url_hidden_param = request.args.get("hidden")
     if url_hidden_param is not None:

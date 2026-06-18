@@ -15,6 +15,8 @@ def safe_Path(subpath):
         return BASE_DIR
     path = Path(subpath)
 
+    path = Path(*Path(subpath).parts)
+
     if path.is_absolute():
         abort(403)
 
