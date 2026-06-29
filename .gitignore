@@ -1,4 +1,5 @@
 plan.txt
 __pycache__/
 *.pyc
-services.json
+data/services.json
+data/users.json

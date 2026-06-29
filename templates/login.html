@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebFile - Login</title>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/login.css') }}">
+</head>
+
+<body>
+    <div class="login-container">
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="msg-wrapper">
+                    {% for message in messages %}
+                        <div class="msg flash-msg-item">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="login-card">
+            <h2>Login</h2>
+
+            <form method="POST" action="/login" class="login-form">
+                <input type="text" name="username" placeholder="Username" required>
+                <input name="password" placeholder="Password" type="password">
+
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='scripts/message.js') }}"></script>
+</body>
+</html>

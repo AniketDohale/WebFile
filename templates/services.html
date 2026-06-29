@@ -18,6 +18,7 @@
         <div class="top-nav">
             <a href="/">Files</a>
             <a href="/services" class="active">Services</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
         </div>
 
         {% if error %}

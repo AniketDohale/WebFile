@@ -40,7 +40,12 @@
 
         <div class="top-nav">
             <a href="/" class="active">Files</a>
-            <a href="/services">Services</a>
+
+            {% if session.get('role') == 'admin' %}
+                <a href="/services">Services</a>
+            {% endif %}
+            
+            <a href="{{ url_for('logout') }}">Logout</a>
         </div>
 
         <!-- Upload -->
@@ -292,5 +297,6 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/message.js') }}"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 import os, datetime, shutil, subprocess, json
 from pathlib import Path
-from flask import abort
-from paths import BASE_DIR, SERVICES_FILE
+from flask import abort, session
+from core.config import BASE_DIR, SERVICES_FILE
 
 TASK_PROGRESS = {}
 CANCEL_TASKS = set()
@@ -9,23 +9,37 @@ VIDEO_EXTENSIONS = {
     ".mp4", ".mkv", ".mov", ".avi", ".m4v", ".webm"
 }
 
+class PermissionDenied(Exception):
+    pass
 
 def safe_Path(subpath):
     if not subpath:
-        return BASE_DIR
-    path = Path(subpath)
+        subpath = ""
 
     path = Path(*Path(subpath).parts)
 
     if path.is_absolute():
-        abort(403)
+        raise PermissionDenied()
 
-    full_Path = (BASE_DIR / path).resolve()
+    full_path = (BASE_DIR / path).resolve()
+
     try:
-        full_Path.relative_to(BASE_DIR)
+        full_path.relative_to(BASE_DIR)
     except ValueError:
-        abort(403)
-    return full_Path
+        raise PermissionDenied()
+
+    if session.get("role") == "admin":
+        return full_path
+
+    allowed = session.get("allowed", [])
+    relative = full_path.relative_to(BASE_DIR)
+
+    for folder in allowed:
+        folder = Path(folder)
+
+        if relative == folder or folder in relative.parents:
+            return full_path
+    raise PermissionDenied()
 
 
 def get_Dir_Size(path):

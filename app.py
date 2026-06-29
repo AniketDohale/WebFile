@@ -1,25 +1,35 @@
 import shutil, threading, uuid, subprocess, platform
 from flask import (
     Flask,
-    render_template,
     request,
+    session,
+    render_template,
     redirect,
     send_from_directory,
     abort,
     flash,
-    session
+    redirect
 )
-from pathlib import Path
-from paths import BASE_DIR
-from utils import (
+
+from core.utils import (
     safe_Path,
     get_Item_Info,
     copy_With_Progress,
+    get_Service_Info,
+    load_Services,
     TASK_PROGRESS,
     CANCEL_TASKS,
-    get_Service_Info,
-    load_Services
+    PermissionDenied
 )
+
+from core.auth import (
+    admin_Required,
+    login_Required
+)
+
+from pathlib import Path
+from core.config import BASE_DIR
+from core.users import authenticate
 
 app = Flask(__name__)
 
@@ -29,10 +39,57 @@ SYSTEM = platform.system()
 
 SERVICES = load_Services()
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if "user" in session:
+        return redirect("/")
+
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+
+        user = authenticate(username, password)
+
+        if user:
+            session["user"] = username
+            session["role"] = user["role"]
+            session["allowed"] = user["allowed"]
+            session["home"] = user.get("home", "")
+
+            flash("Login Successful")
+
+            home = session["home"]
+            return redirect(f"/{home}" if home else "/")
+
+        flash("Invalid Username or Password")
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("Logged Out")
+    return redirect("/login")
+
+@app.errorhandler(PermissionDenied)
+def handle_permission_denied(e):
+    flash("Access Denied")
+    return redirect(request.referrer or "/")
+
+
 @app.route("/")
 @app.route("/<path:subpath>")
+@login_Required
 def browse(subpath=""):
-    full_Path = safe_Path(subpath)
+    if subpath == "":
+        home = session.get("home", "")
+
+        if session.get("role") != "admin" and home:
+            return redirect(f"/{home}")
+
+        full_Path = BASE_DIR
+    else:
+        full_Path = safe_Path(subpath)
+        
 
     if not full_Path.exists():
         flash("Folder Not Found")
@@ -68,6 +125,7 @@ def browse(subpath=""):
 
 
 @app.route("/upload", methods=["POST"])
+@login_Required
 def upload():
     subpath = request.args.get("path", "")
     full_Path = safe_Path(subpath)
@@ -110,6 +168,7 @@ def upload():
 
 
 @app.route("/download/<path:filepath>")
+@login_Required
 def download(filepath):
     full_Path = safe_Path(filepath)
 
@@ -122,6 +181,7 @@ def download(filepath):
 
 
 @app.route("/rename", methods=["POST"])
+@login_Required
 def rename():
     old_Path = request.form.get("old_path")
     new_Name = request.form.get("new_name")
@@ -154,6 +214,7 @@ def rename():
 
 
 @app.route("/delete", methods=["POST"])
+@login_Required
 def delete():
     target_path = request.form.get("path")
 
@@ -178,6 +239,7 @@ def delete():
 
 
 @app.route("/view/<path:filepath>")
+@login_Required
 def view(filepath):
     full_Path = safe_Path(filepath)
 
@@ -189,6 +251,7 @@ def view(filepath):
 
 
 @app.route("/create-file", methods=["POST"])
+@login_Required
 def create_File():
     subpath = request.form.get("path", "")
     file_Name = request.form.get("file_name")
@@ -212,6 +275,7 @@ def create_File():
 
 
 @app.route("/create-folder", methods=["POST"])
+@login_Required
 def create_Folder():
     subpath = request.form.get("path", "")
     folder_Name = request.form.get("folder_name")
@@ -235,6 +299,7 @@ def create_Folder():
 
 
 @app.route("/info/<path:filepath>")
+@login_Required
 def get_info(filepath):
     full_Path = safe_Path(filepath)
     if not full_Path.exists():
@@ -243,6 +308,7 @@ def get_info(filepath):
 
 
 @app.route("/copy", methods=["POST"])
+@login_Required
 def copy():
     path = request.form.get("path")
     if path:
@@ -253,6 +319,7 @@ def copy():
 
 
 @app.route("/cut", methods=["POST"])
+@login_Required
 def cut():
     path = request.form.get("path")
     if path:
@@ -263,6 +330,7 @@ def cut():
 
 
 @app.route("/paste", methods=["POST"])
+@login_Required
 def paste():
     source_Path = session.get("clipboard")
     mode = session.get("clipboard_mode", "copy")
@@ -301,11 +369,13 @@ def paste():
 
 
 @app.route("/progress/<task_id>")
+@login_Required
 def progress(task_id):
     return TASK_PROGRESS.get(task_id, {"status": "not_found"})
 
 
 @app.route("/cancel-task/<task_id>", methods=["POST"])
+@login_Required
 def cancel_task(task_id):
     CANCEL_TASKS.add(task_id)
 
@@ -317,13 +387,10 @@ def cancel_task(task_id):
 
 
 @app.route("/services")
+@admin_Required
 def services():
-
     if SYSTEM == "Windows":
-        return render_template(
-            "services.html",
-            error="Service Management is not Supported on Windows."
-        )
+        return render_template("services.html", error="Service Management is not Supported on Windows")
     
     active = []
     inactive = []
@@ -335,7 +402,6 @@ def services():
             active.append(info)
         else:
             inactive.append(info)
-
     return render_template(
         "services.html",
         active_services=active,
@@ -343,6 +409,7 @@ def services():
     )
 
 @app.route("/service/<name>/<action>", methods=["POST"])
+@admin_Required
 def service_Action(name, action):
 
     allowed = ["start", "stop", "enable", "disable"]
@@ -354,7 +421,6 @@ def service_Action(name, action):
         return "Invalid Action", 400
 
     subprocess.run(["sudo", "systemctl", action, name])
-
     return redirect("/services")
 
 if __name__ == "__main__":

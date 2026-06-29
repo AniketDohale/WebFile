@@ -3,12 +3,20 @@ from pathlib import Path
 
 SYSTEM = platform.system()
 
-SERVICES_FILE = Path("services.json")
+# Project Root
+PROJECT_DIR = Path(__file__).resolve().parent.parent
 
+# Data Directory
+DATA_DIR = PROJECT_DIR / "data"
+
+# JSON Files
+USERS_FILE = DATA_DIR / "users.json"
+SERVICES_FILE = DATA_DIR / "services.json"
+
+# Base Directory
 if SYSTEM == "Windows":
     BASE_DIR = Path(r"D:\Media").resolve()
-
-elif SYSTEM == "Linux":
+else:
     BASE_DIR = Path.home().resolve()
 
 
